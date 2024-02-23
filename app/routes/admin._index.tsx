@@ -1,11 +1,13 @@
 import { LoaderFunction } from "@remix-run/node";
 import AdminController from "~/controllers/AdminController";
 import AdminLayout from "~/layouts/adminLayout";
+import CustomTable from "~/components/custom/CustomTable";
 
 export default function AdminIndex() {
   return (
     <AdminLayout>
       <h1>Admin Dashboard</h1>
+      <CustomTable />
     </AdminLayout>
   );
 }
