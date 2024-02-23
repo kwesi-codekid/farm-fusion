@@ -6,7 +6,7 @@ import {
   ModalFooter,
   Button,
 } from "@nextui-org/react";
-import { Form } from "@remix-run/react";
+import { Form, useSubmit } from "@remix-run/react";
 import { useState } from "react";
 
 const ConfirmModal = ({
@@ -14,8 +14,8 @@ const ConfirmModal = ({
   onCloseModal,
   title,
   children,
-  formMethod,
-  formAction,
+  formMethod = "POST",
+  formAction = "",
 }: {
   isModalOpen: boolean;
   onCloseModal: () => void;
@@ -26,6 +26,7 @@ const ConfirmModal = ({
 }) => {
   // state to handle loading
   const [isLoading, setIsLoading] = useState(false);
+  const submit = useSubmit();
 
   // function to handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -41,6 +42,15 @@ const ConfirmModal = ({
       //   stimulate a network request
       await new Promise((resolve) => setTimeout(resolve, 2000));
       console.log(formValues);
+      submit(
+        {
+          ...formValues,
+        },
+        {
+          method: formMethod,
+          action: formAction,
+        }
+      );
       setIsLoading(false);
       onCloseModal();
     } catch (error) {
@@ -80,10 +90,10 @@ const ConfirmModal = ({
             <ModalHeader className="flex flex-col gap-1">{title}</ModalHeader>
             <ModalBody>
               <Form
-                method="post"
-                id={formMethod}
+                method={formMethod}
+                id="form"
                 onSubmit={handleSubmit}
-                action={formAction && formAction}
+                action={formAction ? formAction : ""}
               >
                 {children}
               </Form>

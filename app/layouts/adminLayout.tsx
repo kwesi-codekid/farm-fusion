@@ -96,7 +96,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 
       {/* logout modal */}
       <ConfirmModal
-        formMethod="get"
+        formMethod="POST"
         isModalOpen={isOpen}
         onCloseModal={onClose}
         title="Logout"
