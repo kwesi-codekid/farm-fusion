@@ -15,12 +15,14 @@ const ConfirmModal = ({
   title,
   children,
   formMethod,
+  formAction,
 }: {
   isModalOpen: boolean;
   onCloseModal: () => void;
   title: string;
   children: React.ReactNode;
   formMethod: string;
+  formAction?: string;
 }) => {
   // state to handle loading
   const [isLoading, setIsLoading] = useState(false);
@@ -77,7 +79,12 @@ const ConfirmModal = ({
           <>
             <ModalHeader className="flex flex-col gap-1">{title}</ModalHeader>
             <ModalBody>
-              <Form method="post" id={formMethod} onSubmit={handleSubmit}>
+              <Form
+                method="post"
+                id={formMethod}
+                onSubmit={handleSubmit}
+                action={formAction && formAction}
+              >
                 {children}
               </Form>
             </ModalBody>

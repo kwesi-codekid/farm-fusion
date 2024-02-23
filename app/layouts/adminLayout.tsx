@@ -100,6 +100,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         isModalOpen={isOpen}
         onCloseModal={onClose}
         title="Logout"
+        formAction="/admin/logout"
       >
         <p>Are you sure you want to logout?</p>
       </ConfirmModal>
