@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import {
   Table,
@@ -15,6 +16,7 @@ import {
   Chip,
   User,
   Pagination,
+  useDisclosure,
 } from "@nextui-org/react";
 import { ChevronDownIcon } from "~/assets/icons/ChevronDown";
 import { PlusIcon } from "~/assets/icons/PlusIcon";
@@ -22,6 +24,7 @@ import { SearchIcon } from "~/assets/icons/SearchIcon";
 import { VerticalDotsIcon } from "~/assets/icons/VerticalDots";
 import { users, columns, statusOptions } from "~/data";
 import { capitalize } from "~/utils";
+import CreateRecordModal from "./CreateRecordModal";
 
 const statusColorMap = {
   active: "success",
@@ -31,7 +34,16 @@ const statusColorMap = {
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "role", "status", "actions"];
 
-export default function CustomTable() {
+export default function CustomTable({
+  formItems,
+}: {
+  formItems?: React.ReactNode;
+}) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const handleOpenModal = () => {
+    onOpen();
+  };
+
   const [filterValue, setFilterValue] = React.useState("");
   const [selectedKeys, setSelectedKeys] = React.useState(new Set([]));
   const [visibleColumns, setVisibleColumns] = React.useState(
@@ -170,12 +182,12 @@ export default function CustomTable() {
   const topContent = React.useMemo(() => {
     return (
       <div className="flex flex-col gap-4">
-        <div className="flex justify-between gap-3 items-end">
+        <div className="flex justify-between gap-3 items-center">
           <Input
             isClearable
             classNames={{
-              base: "w-full sm:max-w-[44%]",
-              inputWrapper: "border-1",
+              base: "w-full sm:max-w-[25%]",
+              inputWrapper: "border-1 rounded-xl",
             }}
             placeholder="Search by name..."
             size="sm"
@@ -185,7 +197,7 @@ export default function CustomTable() {
             onClear={() => setFilterValue("")}
             onValueChange={onSearchChange}
           />
-          <div className="flex gap-3">
+          <div className="flex items-center gap-3">
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button
@@ -239,7 +251,8 @@ export default function CustomTable() {
             <Button
               className="bg-foreground text-background"
               endContent={<PlusIcon />}
-              size="sm"
+              size="md"
+              onPress={handleOpenModal}
             >
               Add New
             </Button>
@@ -317,46 +330,58 @@ export default function CustomTable() {
   );
 
   return (
-    <Table
-      isCompact
-      removeWrapper
-      aria-label="Example table with custom cells, pagination and sorting"
-      bottomContent={bottomContent}
-      bottomContentPlacement="outside"
-      checkboxesProps={{
-        classNames: {
-          wrapper: "after:bg-foreground after:text-background text-background",
-        },
-      }}
-      classNames={classNames}
-      selectedKeys={selectedKeys}
-      selectionMode="multiple"
-      sortDescriptor={sortDescriptor}
-      topContent={topContent}
-      topContentPlacement="outside"
-      onSelectionChange={setSelectedKeys}
-      onSortChange={setSortDescriptor}
-    >
-      <TableHeader columns={headerColumns}>
-        {(column) => (
-          <TableColumn
-            key={column.uid}
-            align={column.uid === "actions" ? "center" : "start"}
-            allowsSorting={column.sortable}
-          >
-            {column.name}
-          </TableColumn>
-        )}
-      </TableHeader>
-      <TableBody emptyContent={"No users found"} items={sortedItems}>
-        {(item) => (
-          <TableRow key={item.id}>
-            {(columnKey) => (
-              <TableCell>{renderCell(item, columnKey)}</TableCell>
-            )}
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+    <>
+      <Table
+        isCompact
+        isHeaderSticky
+        removeWrapper
+        aria-label="Example table with custom cells, pagination and sorting"
+        bottomContent={bottomContent}
+        bottomContentPlacement="outside"
+        checkboxesProps={{
+          classNames: {
+            wrapper:
+              "after:bg-foreground after:text-background text-background",
+          },
+        }}
+        classNames={classNames}
+        selectedKeys={selectedKeys}
+        selectionMode="multiple"
+        sortDescriptor={sortDescriptor}
+        topContent={topContent}
+        topContentPlacement="outside"
+        onSelectionChange={setSelectedKeys}
+        onSortChange={setSortDescriptor}
+      >
+        <TableHeader columns={headerColumns}>
+          {(column) => (
+            <TableColumn
+              key={column.uid}
+              align={column.uid === "actions" ? "center" : "start"}
+              allowsSorting={column.sortable}
+            >
+              {column.name}
+            </TableColumn>
+          )}
+        </TableHeader>
+        <TableBody emptyContent={"No users found"} items={sortedItems}>
+          {(item) => (
+            <TableRow key={item.id}>
+              {(columnKey) => (
+                <TableCell>{renderCell(item, columnKey)}</TableCell>
+              )}
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+
+      <CreateRecordModal
+        isModalOpen={isOpen}
+        onCloseModal={onClose}
+        title="Create Admin"
+      >
+        {formItems}
+      </CreateRecordModal>
+    </>
   );
 }

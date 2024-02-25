@@ -1,10 +1,12 @@
 import React from "react";
 import AppLogo from "~/components/includes/AppLogo";
-import { Avatar, Button, useDisclosure, Input } from "@nextui-org/react";
+import { Avatar, Button, useDisclosure } from "@nextui-org/react";
 import avatar from "~/assets/imgs/avatar.png";
 import { ThemeSwitcher } from "~/components/ThemeSwitcher";
 import { useLocation } from "@remix-run/react";
 import ConfirmModal from "~/components/custom/ConfirmModal";
+import NavLinks from "~/components/custom/NavLink";
+import { navLinks } from "~/data/nav-links";
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const { pathname } = useLocation();
@@ -12,14 +14,17 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
-    <div className="min-h-screen md:h-screen bg-slate-400/25 dark:bg-slate-950 flex flex-col md:flex-row">
+    <div className="min-h-screen md:h-screen overflow-hidden flex flex-col md:flex-row bg-blue-500/10 dark:bg-slate-950 p-2 gap-2">
       {/* sidebar */}
-      <div className="hidden md:flex flex-col justify-between py-3 px-3 bg-white dark:bg-slate-900 h-full w-[17%] border-r dark:border-slate-700">
+      <div className="hidden md:flex flex-col justify-between py-3 px-3 h-full w-[17%] bg-white dark:bg-slate-900 rounded-2xl">
         <AppLogo />
 
-        <div>{/* <PressableCard /> */}</div>
+        {/* nav links */}
+        <div>
+          <NavLinks navLinks={navLinks} />
+        </div>
 
-        <div className="flex items-center justify-between px-3 border-t-[1px] dark:border-slate-700 rounded-xl pt-4">
+        <div className="flex items-center justify-between px-3  rounded-xl pt-4">
           <div className="flex items-center gap-2">
             <Avatar
               src={avatar}
@@ -61,37 +66,24 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       </div>
 
       {/* right side */}
-      <div className="h-full flex-1">
+      <div className="h-full flex-1 flex flex-col gap-2">
         {/* header */}
-        <div className="flex flex-col justify-between">
-          <div className="flex justify-between items-center px-3 py-3 bg-white dark:bg-slate-900 border-b-[1px] dark:border-slate-700">
-            <div className="flex items-center gap-2">
-              <ThemeSwitcher />
-              <h1 className="font-nunito text-lg dark:text-slate-100 text-slate-600">
-                Dashboard
-              </h1>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                color="primary"
-                size="sm"
-                variant="flat"
-                className="dark:bg-slate-800"
-              >
-                Add New
-              </Button>
-              <Button
-                color="primary"
-                size="sm"
-                variant="solid"
-                className="dark:bg-slate-800"
-              >
-                View All
-              </Button>
-            </div>
+        <div className="flex items-center px-3 justify-between bg-white dark:bg-slate-900 rounded-xl h-12">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold dark:text-slate-100 text-slate-600  font-montserrat">
+              {navLinks.find((link) => link.path === pathname)?.title ||
+                "Dashboard"}
+            </h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <ThemeSwitcher />
           </div>
         </div>
-        <div>{children}</div>
+        <div
+          className={`px-3 py-3 flex-1 bg-white dark:bg-slate-900 overflow-y-auto rounded-xl`}
+        >
+          {children}
+        </div>
       </div>
 
       {/* logout modal */}
@@ -102,7 +94,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         title="Logout"
         formAction="/admin/logout"
       >
-        <p>Are you sure you want to logout?</p>
+        <p className="font-nunito">Are you sure you want to logout?</p>
       </ConfirmModal>
     </div>
   );
