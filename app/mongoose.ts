@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 // mongodb://127.0.0.1:27017/linakess_pos
 // "mongodb+srv://HueyWhyte:Famous10@whyte.wdm4x.mongodb.net/Linakess"
 // mongoose.connect(process.env.DATABASE_URL as string);
-mongoose.connect(process.env.DATABASE_URL as string);
+mongoose.connect(process.env.MONGODB_URI as string);
 
 const db = mongoose.connection;
 
