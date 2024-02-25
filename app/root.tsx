@@ -83,8 +83,8 @@ export default function App() {
               open={openSuccessToast}
               onOpenChange={setOpenSuccessToast}
             >
-              <Toast.Title className="text-red-500 font-montserrat font-bold text-sm">
-                Error!
+              <Toast.Title className="text-green-700 font-montserrat font-bold text-sm">
+                Success!
               </Toast.Title>
               <Toast.Description asChild>
                 <p className="font-nunito !text-slate-700 text-xs ToastDescription">
