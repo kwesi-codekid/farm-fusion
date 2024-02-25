@@ -88,7 +88,7 @@ const Login = () => {
               <Input
                 name="email"
                 label="Email"
-                labelPlacement="outside"
+                labelPlacement="inside"
                 className="font-nunito"
                 size="lg"
                 isInvalid={actionData?.errors?.email ? true : false}
@@ -98,7 +98,7 @@ const Login = () => {
               <Input
                 name="password"
                 label="Password"
-                labelPlacement="outside"
+                labelPlacement="inside"
                 fullWidth
                 size="lg"
                 className="font-nunito"
