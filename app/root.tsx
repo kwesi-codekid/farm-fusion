@@ -14,7 +14,7 @@ import radixStyles from "~/radix.css";
 import Providers from "./providers";
 import { useEffect, useState } from "react";
 import * as Toast from "@radix-ui/react-toast";
-import { getSession } from "./flash-session";
+import { commitFlashSession, getFlashSession } from "./flash-session";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
