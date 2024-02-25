@@ -40,6 +40,8 @@ const CreateRecordModal = ({
       console.log(formValues);
       submit(
         {
+          path: location.pathname + location.search,
+          intent: "create",
           ...formValues,
         },
         {

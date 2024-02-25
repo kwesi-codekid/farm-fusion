@@ -24,7 +24,7 @@ export const validatePassword = (password: string) => {
   }
 
   if (!passwordRegex.test(password)) {
-    return "Invalid password";
+    return "Password should contain at least 8 characters, 1 uppercase letter, 1 lowercase letter and 1 number";
   }
 
   return null; // If the password is valid, return null or an empty string
@@ -44,4 +44,20 @@ export const validatePhone = (phone: string) => {
 
 export const validateAddress = (address: string) => {
   return addressRegex.test(address);
+};
+
+export const passwordMatch = (password: string, confirmPassword: string) => {
+  if (!password) {
+    return "Password is required";
+  }
+
+  if (!confirmPassword) {
+    return "Confirm password is required";
+  }
+
+  if (password !== confirmPassword) {
+    return "Passwords do not match";
+  }
+
+  return null;
 };

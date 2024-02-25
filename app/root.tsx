@@ -6,6 +6,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  json,
   useLoaderData,
 } from "@remix-run/react";
 import stylesheet from "~/tailwind.css";
@@ -15,7 +16,11 @@ import { useEffect, useState } from "react";
 import * as Toast from "@radix-ui/react-toast";
 import { toast, Bounce, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { getSession } from "./flash-session";
+import {
+  commitFlashSession,
+  getFlashSession,
+  getSession,
+} from "./flash-session";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -102,8 +107,16 @@ export default function App() {
 }
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const session = await getSession(request.headers.get("Cookie"));
+  const session = await getFlashSession(request.headers.get("Cookie"));
   const flashMessage = session.get("message") || null;
 
-  return { flashMessage };
+  return json(
+    { flashMessage },
+    {
+      headers: {
+        // only necessary with cookieSessionStorage
+        "Set-Cookie": await commitFlashSession(session),
+      },
+    }
+  );
 };
