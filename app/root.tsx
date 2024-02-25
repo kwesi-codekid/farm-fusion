@@ -6,6 +6,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  json,
   useLoaderData,
 } from "@remix-run/react";
 import stylesheet from "~/tailwind.css";
@@ -103,8 +104,16 @@ export default function App() {
 }
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const session = await getSession(request.headers.get("Cookie"));
+  const session = await getFlashSession(request.headers.get("Cookie"));
   const flashMessage = session.get("message") || null;
 
-  return { flashMessage };
+  return json(
+    { flashMessage },
+    {
+      headers: {
+        // only necessary with cookieSessionStorage
+        "Set-Cookie": await commitFlashSession(session),
+      },
+    }
+  );
 };
