@@ -6,8 +6,7 @@ import {
   ModalFooter,
   Button,
 } from "@nextui-org/react";
-import { Form, useSubmit } from "@remix-run/react";
-import { useState } from "react";
+import { Form, useSubmit, useNavigation } from "@remix-run/react";
 
 const CreateRecordModal = ({
   isModalOpen,
@@ -21,22 +20,22 @@ const CreateRecordModal = ({
   children: React.ReactNode;
 }) => {
   // state to handle loading
-  const [isLoading, setIsLoading] = useState(false);
+  const navigation = useNavigation();
+  const isLoading =
+    navigation.state === "submitting" || navigation.state === "loading";
+
   const submit = useSubmit();
 
   // function to handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
       e.preventDefault();
-      setIsLoading(true);
       const formData = new FormData(e.currentTarget);
       const formValues: { [key: string]: string } = {};
 
       for (const [key, value] of formData.entries()) {
         formValues[key] = value as string;
       }
-      //   stimulate a network request
-      await new Promise((resolve) => setTimeout(resolve, 2000));
       console.log(formValues);
       submit(
         {
@@ -46,7 +45,6 @@ const CreateRecordModal = ({
           method: "POST",
         }
       );
-      setIsLoading(false);
       onCloseModal();
     } catch (error) {
       console.error(error);
@@ -93,12 +91,18 @@ const CreateRecordModal = ({
               </Form>
             </ModalBody>
             <ModalFooter>
-              <Button color="danger" variant="flat" onPress={onCloseModal}>
+              <Button
+                className="font-montserrat"
+                color="danger"
+                variant="flat"
+                onPress={onCloseModal}
+              >
                 Cancel
               </Button>
               <Button
-                color="primary"
                 isLoading={isLoading}
+                className="font-montserrat"
+                color="primary"
                 type="submit"
                 form="form"
               >
