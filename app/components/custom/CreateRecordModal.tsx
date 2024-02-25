@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Modal,
   ModalContent,
@@ -7,22 +8,31 @@ import {
   Button,
 } from "@nextui-org/react";
 import { Form, useSubmit, useNavigation } from "@remix-run/react";
+import { useEffect } from "react";
 
 const CreateRecordModal = ({
   isModalOpen,
   onCloseModal,
   title,
   children,
+  actionData,
 }: {
   isModalOpen: boolean;
   onCloseModal: () => void;
   title: string;
   children: React.ReactNode;
+  actionData?: any;
 }) => {
   // state to handle loading
   const navigation = useNavigation();
   const isLoading =
     navigation.state === "submitting" || navigation.state === "loading";
+
+  useEffect(() => {
+    if (actionData?.success) {
+      onCloseModal();
+    }
+  }, [actionData, onCloseModal]);
 
   const submit = useSubmit();
 
@@ -36,7 +46,7 @@ const CreateRecordModal = ({
       for (const [key, value] of formData.entries()) {
         formValues[key] = value as string;
       }
-      console.log(formValues);
+
       submit(
         {
           path: location.pathname + location.search,
@@ -47,7 +57,6 @@ const CreateRecordModal = ({
           method: "POST",
         }
       );
-      onCloseModal();
     } catch (error) {
       console.error(error);
     }

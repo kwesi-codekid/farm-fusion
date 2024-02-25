@@ -3,11 +3,14 @@ import { Input } from "@nextui-org/react";
 const CustomInput = ({
   label,
   name,
-  type,
+  isInvalid,
+  errorMessage,
 }: {
   label: string;
   name: string;
   type?: string;
+  isInvalid?: boolean;
+  errorMessage?: string;
 }) => {
   return (
     <Input
@@ -21,6 +24,8 @@ const CustomInput = ({
       }}
       label={label}
       name={name}
+      isInvalid={isInvalid}
+      errorMessage={errorMessage}
     />
   );
 };

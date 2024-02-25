@@ -36,8 +36,10 @@ const INITIAL_VISIBLE_COLUMNS = ["name", "role", "status", "actions"];
 
 export default function CustomTable({
   formItems,
+  actionData,
 }: {
   formItems?: React.ReactNode;
+  actionData?: any;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const handleOpenModal = () => {
@@ -379,6 +381,7 @@ export default function CustomTable({
         isModalOpen={isOpen}
         onCloseModal={onClose}
         title="Create Admin"
+        actionData={actionData}
       >
         {formItems}
       </CreateRecordModal>

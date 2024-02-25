@@ -10,12 +10,13 @@ import CustomInput from "~/components/custom/CustomInput";
 import AdminController from "~/controllers/AdminController";
 import { passwordMatch } from "~/validators";
 import RoleController from "~/controllers/RoleController";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useActionData } from "@remix-run/react";
 
 export default function Admins() {
   const { admins } = useLoaderData();
+  const actionData = useActionData();
 
-  console.log({ admins });
+  // console.log({ admins });
 
   return (
     <AdminLayout>
@@ -31,7 +32,12 @@ export default function Admins() {
               <CustomInput label="Email" name="email" />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <CustomInput label="Password" name="password" />
+              <CustomInput
+                isInvalid={actionData?.errors?.password ? true : false}
+                errorMessage={actionData?.errors?.password}
+                label="Password"
+                name="password"
+              />
               <CustomInput label="Confirm Password" name="confirmPassword" />
             </div>
           </div>
