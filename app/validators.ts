@@ -79,7 +79,7 @@ export const validateFirstName = (firstName: string) => {
   }
 
   // Validation passed
-  return "First name validation successful";
+  return null;
 };
 
 export const validateLastName = (lastName: string) => {
@@ -96,15 +96,15 @@ export const validateLastName = (lastName: string) => {
   }
 
   // Validation passed
-  return "Last name validation successful";
+  return null;
 };
 
-// Example usage:
-const firstName = "John";
-const lastName = "Doe";
+// // Example usage:
+// const firstName = "John";
+// const lastName = "Doe";
 
-const firstNameValidationMessage = validateFirstName(firstName);
-const lastNameValidationMessage = validateLastName(lastName);
+// const firstNameValidationMessage = validateFirstName(firstName);
+// const lastNameValidationMessage = validateLastName(lastName);
 
-console.log(firstNameValidationMessage);
-console.log(lastNameValidationMessage);
+// console.log(firstNameValidationMessage);
+// console.log(lastNameValidationMessage);
