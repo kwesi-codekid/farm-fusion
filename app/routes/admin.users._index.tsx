@@ -17,6 +17,7 @@ import RoleController from "~/controllers/RoleController";
 import { useLoaderData, useActionData } from "@remix-run/react";
 import CustomTable from "~/components/custom/CustomTable";
 import CustomInput from "~/components/custom/CustomInput";
+import CustomSelect from "~/components/custom/CustomSelect";
 import { useEffect, useState } from "react";
 
 export default function Admins() {
@@ -40,14 +41,14 @@ export default function Admins() {
         isRequired={true}
         label="First Name"
         name="firstName"
-        isInvalid={actionData?.errors?.firstName ? true : false}
-        errorMessage={actionData?.errors?.firstName}
+        // isInvalid={actionData?.errors?.firstName ? true : false}
+        // errorMessage={actionData?.errors?.firstName}
       />
       <CustomInput
         label="Last Name"
         name="lastName"
-        isInvalid={actionData?.errors?.lastName ? true : false}
-        errorMessage={actionData?.errors?.lastName}
+        // isInvalid={actionData?.errors?.lastName ? true : false}
+        // errorMessage={actionData?.errors?.lastName}
       />
       <CustomInput
         label="Email"
@@ -76,11 +77,25 @@ export default function Admins() {
         isInvalid={actionData?.errors?.confirmPassword ? true : false}
         errorMessage={actionData?.errors?.confirmPassword}
       />
-      <CustomInput
+      <CustomSelect
         label="Role"
         name="role"
         isInvalid={actionData?.errors?.role ? true : false}
         errorMessage={actionData?.errors?.role}
+        items={[
+          {
+            value: "admin",
+            label: "Admin",
+            id: "admin",
+            chipColor: "primary",
+          },
+          {
+            value: "super admin",
+            label: "Super Admin",
+            id: "super-admin",
+            chipColor: "secondary",
+          },
+        ]}
       />
     </div>
   );

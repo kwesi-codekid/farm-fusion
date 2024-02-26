@@ -101,6 +101,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
         startContent={<PlusIcon />}
         onPress={openCreateRecordModal}
       >
+        <Input className="hidden" name="intent" value={"create"} />
         {addButtonText}
       </Button>
     </div>
