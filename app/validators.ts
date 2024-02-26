@@ -64,3 +64,47 @@ export const confirmPassword = (password: string, confirmPassword: string) => {
 
   return null;
 };
+
+export const validateFirstName = (firstName: string) => {
+  const nameRegex = /^[a-zA-Z]+$/;
+
+  // Check if firstName is not empty
+  if (!firstName.trim()) {
+    return "Please enter a first name.";
+  }
+
+  // Check if firstName contains only letters
+  if (!nameRegex.test(firstName)) {
+    return "First name should contain only letters.";
+  }
+
+  // Validation passed
+  return "First name validation successful";
+};
+
+export const validateLastName = (lastName: string) => {
+  const nameRegex = /^[a-zA-Z]+$/;
+
+  // Check if lastName is not empty
+  if (!lastName.trim()) {
+    return "Please enter a last name.";
+  }
+
+  // Check if lastName contains only letters
+  if (!nameRegex.test(lastName)) {
+    return "Last name should contain only letters.";
+  }
+
+  // Validation passed
+  return "Last name validation successful";
+};
+
+// Example usage:
+const firstName = "John";
+const lastName = "Doe";
+
+const firstNameValidationMessage = validateFirstName(firstName);
+const lastNameValidationMessage = validateLastName(lastName);
+
+console.log(firstNameValidationMessage);
+console.log(lastNameValidationMessage);
