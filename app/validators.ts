@@ -99,12 +99,12 @@ export const validateLastName = (lastName: string) => {
   return "Last name validation successful";
 };
 
-// Example usage:
-const firstName = "John";
-const lastName = "Doe";
+// // Example usage:
+// const firstName = "John";
+// const lastName = "Doe";
 
-const firstNameValidationMessage = validateFirstName(firstName);
-const lastNameValidationMessage = validateLastName(lastName);
+// const firstNameValidationMessage = validateFirstName(firstName);
+// const lastNameValidationMessage = validateLastName(lastName);
 
-console.log(firstNameValidationMessage);
-console.log(lastNameValidationMessage);
+// console.log(firstNameValidationMessage);
+// console.log(lastNameValidationMessage);

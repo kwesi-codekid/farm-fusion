@@ -27,7 +27,7 @@ const adminSchema = new Schema<AdminInterface>(
       type: String,
       required: false,
     },
-    permissions: {
+    designation: {
       type: Array,
       default: [],
     },
