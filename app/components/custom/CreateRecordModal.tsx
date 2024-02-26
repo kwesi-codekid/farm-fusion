@@ -72,7 +72,7 @@ const CreateRecordModal = ({
       motionProps={{
         variants: {
           enter: {
-            y: -20,
+            scale: [1, 0.9],
             opacity: 1,
             transition: {
               duration: 0.3,
@@ -80,7 +80,7 @@ const CreateRecordModal = ({
             },
           },
           exit: {
-            y: 0,
+            scale: [0.9, 1],
             opacity: 0,
             transition: {
               duration: 0.2,

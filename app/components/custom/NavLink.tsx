@@ -27,8 +27,8 @@ const NavLinks: React.FC<NavLinksProps> = ({ navLinks }) => {
             to={`${item.path}`}
             className={({ isActive }) =>
               isActive
-                ? "text-white bg-primary px-2 py-1.5 rounded-xl shadow-sm w-full items-center flex flex-1 transition-all duration-100 ease-in-out"
-                : "text-[#656566] px-2 py-1.5 items-center rounded-xl hover:bg-primary/90 w-full flex flex-1 hover:text-gray-50 transition-all duration-100 ease-in-out"
+                ? "text-primary px-2 py-1.5 w-full items-center flex flex-1 transition-all duration-500 ease-in-out"
+                : "text-[#656566] px-2 py-1.5 items-center rounded-xl hover:text-primary/80 w-full flex flex-1 transition-all duration-500 ease-in-out"
             }
           >
             {item.icon && item.icon}
@@ -47,7 +47,7 @@ const NavLinks: React.FC<NavLinksProps> = ({ navLinks }) => {
                 to={`${child.path}`}
                 className={({ isActive }) =>
                   isActive
-                    ? "text-white bg-primary px-2 py-1.5 rounded-xl shadow-sm w-full items-center flex flex-1 transition-all duration-100 ease-in-out"
+                    ? "text-white bg-primary/40 px-2 py-1.5 rounded-xl shadow-sm w-full items-center flex flex-1 transition-all duration-100 ease-in-out"
                     : "text-[#656566] px-2 py-1.5 items-center rounded-xl hover:bg-primary/90 w-full flex flex-1 hover:text-gray-50 transition-all duration-100 ease-in-out"
                 }
               >

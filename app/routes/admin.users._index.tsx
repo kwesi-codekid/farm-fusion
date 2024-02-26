@@ -30,10 +30,32 @@ export default function Admins() {
 
   const createAdminFormItems = (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-      <CustomInput isRequired={true} label="First Name" name="firstName" />
-      <CustomInput label="Last Name" name="lastName" />
-      <CustomInput label="Email" name="email" />
-      <CustomInput label="Phone" name="phone" />
+      <CustomInput
+        isRequired={true}
+        label="First Name"
+        name="firstName"
+        isInvalid={actionData?.errors?.firstName ? true : false}
+        errorMessage={actionData?.errors?.firstName}
+      />
+      <CustomInput
+        label="Last Name"
+        name="lastName"
+        isInvalid={actionData?.errors?.lastName ? true : false}
+        errorMessage={actionData?.errors?.lastName}
+      />
+      <CustomInput
+        label="Email"
+        name="email"
+        type="email"
+        isInvalid={actionData?.errors?.email ? true : false}
+        errorMessage={actionData?.errors?.email}
+      />
+      <CustomInput
+        label="Phone"
+        name="phone"
+        isInvalid={actionData?.errors?.phone ? true : false}
+        errorMessage={actionData?.errors?.phone}
+      />
       <CustomInput
         isInvalid={actionData?.errors?.password ? true : false}
         errorMessage={actionData?.errors?.password}
@@ -45,8 +67,15 @@ export default function Admins() {
         label="Confirm Password"
         name="confirmPassword"
         type="password"
+        isInvalid={actionData?.errors?.confirmPassword ? true : false}
+        errorMessage={actionData?.errors?.confirmPassword}
       />
-      <CustomInput label="Role" name="role" />
+      <CustomInput
+        label="Role"
+        name="role"
+        isInvalid={actionData?.errors?.role ? true : false}
+        errorMessage={actionData?.errors?.role}
+      />
     </div>
   );
 

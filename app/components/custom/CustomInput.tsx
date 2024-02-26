@@ -14,7 +14,6 @@ const CustomInput = ({
   isInvalid?: boolean;
   errorMessage?: string;
   isRequired?: boolean;
-  type?: string;
 }) => {
   return (
     <Input
