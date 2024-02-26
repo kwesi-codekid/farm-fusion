@@ -79,7 +79,7 @@ export const validateFirstName = (firstName: string) => {
   }
 
   // Validation passed
-  return "First name validation successful";
+  return null;
 };
 
 export const validateLastName = (lastName: string) => {
@@ -96,7 +96,7 @@ export const validateLastName = (lastName: string) => {
   }
 
   // Validation passed
-  return "Last name validation successful";
+  return null;
 };
 
 // // Example usage:
