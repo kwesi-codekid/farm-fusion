@@ -6,7 +6,13 @@ import {
   json,
 } from "@remix-run/node";
 import AdminController from "~/controllers/AdminController";
-import { confirmPassword, passwordMatch, validateEmail } from "~/validators";
+import {
+  confirmPassword,
+  passwordMatch,
+  validateEmail,
+  validateFirstName,
+  validateLastName,
+} from "~/validators";
 import RoleController from "~/controllers/RoleController";
 import { useLoaderData, useActionData } from "@remix-run/react";
 import CustomTable from "~/components/custom/CustomTable";
@@ -114,6 +120,8 @@ export const action: ActionFunction = async ({ request }) => {
         phone: phone ? null : "Phone is required",
         role: role ? null : "Role is required",
         designation: role ? null : "Designation is required",
+        firstName: validateFirstName(firstName),
+        lastName: validateLastName(lastName),
       };
 
       if (Object.values(errors).some(Boolean)) {
