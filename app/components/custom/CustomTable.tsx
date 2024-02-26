@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Table,
   TableHeader,
@@ -7,384 +7,206 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Input,
-  Button,
-  DropdownTrigger,
-  Dropdown,
-  DropdownMenu,
-  DropdownItem,
-  Chip,
-  User,
-  Pagination,
+  getKeyValue,
+  Spinner,
+  Tooltip,
   useDisclosure,
+  Button,
+  Input,
 } from "@nextui-org/react";
-import { ChevronDownIcon } from "~/assets/icons/ChevronDown";
+import { useAsyncList } from "@react-stately/data";
+import { EyeOutlined } from "~/assets/icons/EyeOutlined";
+import { EditIcon } from "~/assets/icons/EditIcon";
+import { DeleteIcon } from "~/assets/icons/DeleteIcon";
 import { PlusIcon } from "~/assets/icons/PlusIcon";
-import { SearchIcon } from "~/assets/icons/SearchIcon";
-import { VerticalDotsIcon } from "~/assets/icons/VerticalDots";
-import { users, columns, statusOptions } from "~/data";
-import { capitalize } from "~/utils";
+import ConfirmModal from "./ConfirmModal";
 import CreateRecordModal from "./CreateRecordModal";
 
-const statusColorMap = {
-  active: "success",
-  paused: "danger",
-  vacation: "warning",
-};
+interface Column {
+  key: string;
+  name: string;
+}
 
-const INITIAL_VISIBLE_COLUMNS = ["name", "role", "status", "actions"];
+interface Item {
+  [key: string]: any;
+}
 
-export default function CustomTable({
-  formItems,
-  actionData,
-}: {
-  formItems?: React.ReactNode;
-  actionData?: any;
-}) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const handleOpenModal = () => {
-    onOpen();
+interface CustomTableProps {
+  items: Item[];
+  columns: Column[];
+  addButtonText: string;
+  createRecordFormItems?: React.ReactNode;
+}
+
+const CustomTable: React.FC<CustomTableProps> = ({
+  items,
+  columns,
+  addButtonText,
+  createRecordFormItems,
+}) => {
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  const list = useAsyncList({
+    async load() {
+      setIsLoading(false);
+
+      return {
+        items: items,
+      };
+    },
+    async sort({ items, sortDescriptor }) {
+      return {
+        items: items.sort((a, b) => {
+          const first = a[sortDescriptor.column];
+          const second = b[sortDescriptor.column];
+          let cmp =
+            (parseInt(first) || first) < (parseInt(second) || second) ? -1 : 1;
+
+          if (sortDescriptor.direction === "descending") {
+            cmp *= -1;
+          }
+
+          return cmp;
+        }),
+      };
+    },
+  });
+
+  useEffect(() => {
+    list.reload();
+  }, [items]);
+
+  // delete record stuff
+  const deleteDisclosure = useDisclosure();
+  const [deleteId, setDeleteId] = React.useState<string>("");
+  const openDeleteModal = (deleteId) => {
+    setDeleteId(deleteId);
+    deleteDisclosure.onOpen();
   };
 
-  const [filterValue, setFilterValue] = React.useState("");
-  const [selectedKeys, setSelectedKeys] = React.useState(new Set([]));
-  const [visibleColumns, setVisibleColumns] = React.useState(
-    new Set(INITIAL_VISIBLE_COLUMNS)
-  );
-  const [statusFilter, setStatusFilter] = React.useState("all");
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const [sortDescriptor, setSortDescriptor] = React.useState({
-    column: "age",
-    direction: "ascending",
-  });
-  const [page, setPage] = React.useState(1);
+  // create record stuff
+  const createRecordDisclosure = useDisclosure();
+  const openCreateRecordModal = () => {
+    createRecordDisclosure.onOpen();
+  };
 
-  const pages = Math.ceil(users.length / rowsPerPage);
-
-  const hasSearchFilter = Boolean(filterValue);
-
-  const headerColumns = React.useMemo(() => {
-    if (visibleColumns === "all") return columns;
-
-    return columns.filter((column) =>
-      Array.from(visibleColumns).includes(column.uid)
-    );
-  }, [visibleColumns]);
-
-  const filteredItems = React.useMemo(() => {
-    let filteredUsers = [...users];
-
-    if (hasSearchFilter) {
-      filteredUsers = filteredUsers.filter((user) =>
-        user.name.toLowerCase().includes(filterValue.toLowerCase())
-      );
-    }
-    if (
-      statusFilter !== "all" &&
-      Array.from(statusFilter).length !== statusOptions.length
-    ) {
-      filteredUsers = filteredUsers.filter((user) =>
-        Array.from(statusFilter).includes(user.status)
-      );
-    }
-
-    return filteredUsers;
-  }, [users, filterValue, statusFilter]);
-
-  const items = React.useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-
-    return filteredItems.slice(start, end);
-  }, [page, filteredItems, rowsPerPage]);
-
-  const sortedItems = React.useMemo(() => {
-    return [...items].sort((a, b) => {
-      const first = a[sortDescriptor.column];
-      const second = b[sortDescriptor.column];
-      const cmp = first < second ? -1 : first > second ? 1 : 0;
-
-      return sortDescriptor.direction === "descending" ? -cmp : cmp;
-    });
-  }, [sortDescriptor, items]);
-
-  const renderCell = React.useCallback((user, columnKey) => {
-    const cellValue = user[columnKey];
-
-    switch (columnKey) {
-      case "name":
-        return (
-          <User
-            avatarProps={{ radius: "full", size: "sm", src: user.avatar }}
-            classNames={{
-              description: "text-default-500",
-            }}
-            description={user.email}
-            name={cellValue}
-          >
-            {user.email}
-          </User>
-        );
-      case "role":
-        return (
-          <div className="flex flex-col">
-            <p className="text-bold text-small capitalize">{cellValue}</p>
-            <p className="text-bold text-tiny capitalize text-default-500">
-              {user.team}
-            </p>
-          </div>
-        );
-      case "status":
-        return (
-          <Chip
-            className="capitalize border-none gap-1 text-default-600"
-            color={statusColorMap[user.status]}
-            size="sm"
-            variant="dot"
-          >
-            {cellValue}
-          </Chip>
-        );
-      case "actions":
-        return (
-          <div className="relative flex justify-end items-center gap-2">
-            <Dropdown className="bg-background border-1 border-default-200">
-              <DropdownTrigger>
-                <Button isIconOnly radius="full" size="sm" variant="light">
-                  <VerticalDotsIcon className="text-default-400" />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu>
-                <DropdownItem>View</DropdownItem>
-                <DropdownItem>Edit</DropdownItem>
-                <DropdownItem>Delete</DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-        );
-      default:
-        return cellValue;
-    }
-  }, []);
-
-  const onRowsPerPageChange = React.useCallback((e) => {
-    setRowsPerPage(Number(e.target.value));
-    setPage(1);
-  }, []);
-
-  const onSearchChange = React.useCallback((value) => {
-    if (value) {
-      setFilterValue(value);
-      setPage(1);
-    } else {
-      setFilterValue("");
-    }
-  }, []);
-
-  const topContent = React.useMemo(() => {
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="flex justify-between gap-3 items-center">
-          <Input
-            isClearable
-            classNames={{
-              base: "w-full sm:max-w-[25%]",
-              inputWrapper: "border-1 rounded-xl",
-            }}
-            placeholder="Search by name..."
-            size="sm"
-            startContent={<SearchIcon className="text-default-300" />}
-            value={filterValue}
-            variant="bordered"
-            onClear={() => setFilterValue("")}
-            onValueChange={onSearchChange}
-          />
-          <div className="flex items-center gap-3">
-            <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button
-                  endContent={<ChevronDownIcon className="text-small" />}
-                  size="sm"
-                  variant="flat"
-                >
-                  Status
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Table Columns"
-                closeOnSelect={false}
-                selectedKeys={statusFilter}
-                selectionMode="multiple"
-                onSelectionChange={setStatusFilter}
-              >
-                {statusOptions.map((status) => (
-                  <DropdownItem key={status.uid} className="capitalize">
-                    {capitalize(status.name)}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-            <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button
-                  endContent={<ChevronDownIcon className="text-small" />}
-                  size="sm"
-                  variant="flat"
-                >
-                  Columns
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Table Columns"
-                closeOnSelect={false}
-                selectedKeys={visibleColumns}
-                selectionMode="multiple"
-                onSelectionChange={setVisibleColumns}
-              >
-                {columns.map((column) => (
-                  <DropdownItem key={column.uid} className="capitalize">
-                    {capitalize(column.name)}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-            <Button
-              className="bg-foreground text-background"
-              endContent={<PlusIcon />}
-              size="md"
-              onPress={handleOpenModal}
-            >
-              Add New
-            </Button>
-          </div>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-default-400 text-small">
-            Total {users.length} users
-          </span>
-          <label className="flex items-center text-default-400 text-small">
-            Rows per page:
-            <select
-              className="bg-transparent outline-none text-default-400 text-small"
-              onChange={onRowsPerPageChange}
-            >
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="15">15</option>
-            </select>
-          </label>
-        </div>
-      </div>
-    );
-  }, [
-    filterValue,
-    statusFilter,
-    visibleColumns,
-    onSearchChange,
-    onRowsPerPageChange,
-    users.length,
-    hasSearchFilter,
-  ]);
-
-  const bottomContent = React.useMemo(() => {
-    return (
-      <div className="py-2 px-2 flex justify-between items-center">
-        <Pagination
-          showControls
-          classNames={{
-            cursor: "bg-foreground text-background",
-          }}
-          color="default"
-          isDisabled={hasSearchFilter}
-          page={page}
-          total={pages}
-          variant="light"
-          onChange={setPage}
-        />
-        <span className="text-small text-default-400">
-          {selectedKeys === "all"
-            ? "All items selected"
-            : `${selectedKeys.size} of ${items.length} selected`}
-        </span>
-      </div>
-    );
-  }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
-
-  const classNames = React.useMemo(
-    () => ({
-      wrapper: ["max-h-[382px]", "max-w-3xl"],
-      th: ["bg-transparent", "text-default-500", "border-b", "border-divider"],
-      td: [
-        // changing the rows border radius
-        // first
-        "group-data-[first=true]:first:before:rounded-none",
-        "group-data-[first=true]:last:before:rounded-none",
-        // middle
-        "group-data-[middle=true]:before:rounded-none",
-        // last
-        "group-data-[last=true]:first:before:rounded-none",
-        "group-data-[last=true]:last:before:rounded-none",
-      ],
-    }),
-    []
+  // table top content
+  const tableTopContent = (
+    <div className="flex items-center justify-between">
+      <h2 className="text-2xl font-bold font-montserrat">Users</h2>
+      <Button
+        className="font-montserrat"
+        size="sm"
+        color="primary"
+        startContent={<PlusIcon />}
+        onPress={openCreateRecordModal}
+      >
+        {addButtonText}
+      </Button>
+    </div>
   );
 
   return (
-    <>
+    <div>
       <Table
-        isCompact
-        isHeaderSticky
-        removeWrapper
-        aria-label="Example table with custom cells, pagination and sorting"
-        bottomContent={bottomContent}
-        bottomContentPlacement="outside"
-        checkboxesProps={{
-          classNames: {
-            wrapper:
-              "after:bg-foreground after:text-background text-background",
-          },
+        aria-label="Custom data table"
+        topContent={tableTopContent}
+        sortDescriptor={list.sortDescriptor}
+        onSortChange={list.sort}
+        classNames={{
+          table: "w-full",
         }}
-        classNames={classNames}
-        selectedKeys={selectedKeys}
-        selectionMode="multiple"
-        sortDescriptor={sortDescriptor}
-        topContent={topContent}
-        topContentPlacement="outside"
-        onSelectionChange={setSelectedKeys}
-        onSortChange={setSortDescriptor}
       >
-        <TableHeader columns={headerColumns}>
-          {(column) => (
-            <TableColumn
-              key={column.uid}
-              align={column.uid === "actions" ? "center" : "start"}
-              allowsSorting={column.sortable}
-            >
+        <TableHeader>
+          {columns.map((column) => (
+            <TableColumn key={column.key} allowsSorting>
               {column.name}
             </TableColumn>
-          )}
+          ))}
         </TableHeader>
-        <TableBody emptyContent={"No users found"} items={sortedItems}>
-          {(item) => (
-            <TableRow key={item.id}>
-              {(columnKey) => (
-                <TableCell>{renderCell(item, columnKey)}</TableCell>
-              )}
+        <TableBody
+          items={list.items}
+          isLoading={isLoading}
+          loadingContent={<Spinner label="Loading..." />}
+        >
+          {(item: any) => (
+            <TableRow key={item._id}>
+              {(columnKey) => {
+                return columnKey === "actions" ? (
+                  <TableCell key={columnKey}>
+                    <div className="relative flex items-center">
+                      <Tooltip content="Details">
+                        <Button
+                          variant="light"
+                          radius="full"
+                          color="default"
+                          isIconOnly
+                          size="sm"
+                        >
+                          <EyeOutlined className="size-4" />
+                        </Button>
+                      </Tooltip>
+                      <Tooltip content="Edit user">
+                        <Button
+                          variant="light"
+                          radius="full"
+                          color="primary"
+                          isIconOnly
+                          size="sm"
+                        >
+                          <EditIcon className="size-4" />
+                        </Button>
+                      </Tooltip>
+                      <Tooltip color="danger" content="Delete user">
+                        <Button
+                          onClick={() => openDeleteModal(item._id)}
+                          variant="light"
+                          radius="full"
+                          color="danger"
+                          isIconOnly
+                          size="sm"
+                        >
+                          <DeleteIcon className="size-4" />
+                        </Button>
+                      </Tooltip>
+                    </div>
+                  </TableCell>
+                ) : (
+                  <TableCell className="font-nunito text-sm" key={columnKey}>
+                    {getKeyValue(item, columnKey)}
+                  </TableCell>
+                );
+              }}
             </TableRow>
           )}
         </TableBody>
       </Table>
 
+      {/* create modal */}
       <CreateRecordModal
-        isModalOpen={isOpen}
-        onCloseModal={onClose}
-        title="Create Admin"
-        actionData={actionData}
+        title="Create User"
+        isModalOpen={createRecordDisclosure.isOpen}
+        onCloseModal={createRecordDisclosure.onClose}
       >
-        {formItems}
+        {createRecordFormItems}
       </CreateRecordModal>
-    </>
+
+      {/* delete modal */}
+      <ConfirmModal
+        title="Delete User"
+        isModalOpen={deleteDisclosure.isOpen}
+        onCloseModal={deleteDisclosure.onClose}
+        formMethod="POST"
+        formAction=""
+      >
+        <Input className="hidden" name="intent" value={"delete"} />
+        <Input className="hidden" name="_id" value={deleteId} />
+        <p className="font-nunito">
+          Are you sure you want to delete this user?
+        </p>
+      </ConfirmModal>
+    </div>
   );
-}
+};
+
+export default CustomTable;

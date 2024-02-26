@@ -29,7 +29,7 @@ const CreateRecordModal = ({
     navigation.state === "submitting" || navigation.state === "loading";
 
   useEffect(() => {
-    if (actionData?.success) {
+    if (!actionData) {
       onCloseModal();
     }
   }, [actionData, onCloseModal]);

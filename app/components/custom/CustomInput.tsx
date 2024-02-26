@@ -5,12 +5,16 @@ const CustomInput = ({
   name,
   isInvalid,
   errorMessage,
+  isRequired,
+  type,
 }: {
   label: string;
   name: string;
   type?: string;
   isInvalid?: boolean;
   errorMessage?: string;
+  isRequired?: boolean;
+  type?: string;
 }) => {
   return (
     <Input
@@ -26,6 +30,8 @@ const CustomInput = ({
       name={name}
       isInvalid={isInvalid}
       errorMessage={errorMessage}
+      required={isRequired}
+      type={type}
     />
   );
 };

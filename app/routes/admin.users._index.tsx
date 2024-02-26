@@ -1,47 +1,87 @@
 import AdminLayout from "~/layouts/adminLayout";
-import CustomTable from "~/components/custom/CustomTable";
 import {
   ActionFunction,
   LoaderFunction,
   MetaFunction,
   json,
 } from "@remix-run/node";
-import CustomInput from "~/components/custom/CustomInput";
 import AdminController from "~/controllers/AdminController";
 import { passwordMatch } from "~/validators";
 import RoleController from "~/controllers/RoleController";
 import { useLoaderData, useActionData } from "@remix-run/react";
+import CustomTable from "~/components/custom/CustomTable";
+import CustomInput from "~/components/custom/CustomInput";
+import { useEffect, useState } from "react";
 
 export default function Admins() {
   const { admins } = useLoaderData();
   const actionData = useActionData();
+  useEffect(() => {
+    if (actionData) {
+      console.log(actionData);
+    }
+  }, [actionData]);
 
-  // console.log({ admins });
+  const [adminsData, setAdminsData] = useState(admins);
+
+  useEffect(() => {
+    setAdminsData(admins);
+  }, [admins, adminsData]);
+
+  const createAdminFormItems = (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <CustomInput isRequired={true} label="First Name" name="firstName" />
+      <CustomInput label="Last Name" name="lastName" />
+      <CustomInput label="Email" name="email" />
+      <CustomInput label="Phone" name="phone" />
+      <CustomInput
+        isInvalid={actionData?.errors?.password ? true : false}
+        errorMessage={actionData?.errors?.password}
+        label="Password"
+        name="password"
+        type="password"
+      />
+      <CustomInput
+        label="Confirm Password"
+        name="confirmPassword"
+        type="password"
+      />
+      <CustomInput label="Role" name="role" />
+    </div>
+  );
 
   return (
     <AdminLayout>
       <CustomTable
-        formItems={
-          <div className="flex flex-col gap-8">
-            <div className="grid grid-cols-2 gap-4">
-              <CustomInput label="First Name" name="firstName" />
-              <CustomInput label="Last Name" name="lastName" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <CustomInput label="Phone" name="phone" />
-              <CustomInput label="Email" name="email" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <CustomInput
-                isInvalid={actionData?.errors?.password ? true : false}
-                errorMessage={actionData?.errors?.password}
-                label="Password"
-                name="password"
-              />
-              <CustomInput label="Confirm Password" name="confirmPassword" />
-            </div>
-          </div>
-        }
+        createRecordFormItems={createAdminFormItems}
+        addButtonText="Add User"
+        columns={[
+          {
+            key: "firstName",
+            name: "First Name",
+          },
+          {
+            key: "lastName",
+            name: "Last Name",
+          },
+          {
+            key: "email",
+            name: "Email",
+          },
+          {
+            key: "phone",
+            name: "Phone",
+          },
+          {
+            key: "role",
+            name: "Role",
+          },
+          {
+            key: "actions",
+            name: "Actions",
+          },
+        ]}
+        items={adminsData}
       />
     </AdminLayout>
   );

@@ -31,7 +31,7 @@ const { getSession, commitSession, destroySession } =
       //
       // expires: new Date(Date.now() + 60_000),
       httpOnly: true,
-      maxAge: 60,
+      maxAge: 1,
       path: "/",
       sameSite: "lax",
       secrets: [secret],
