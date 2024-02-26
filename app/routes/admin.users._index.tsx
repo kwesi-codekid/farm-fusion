@@ -6,7 +6,7 @@ import {
   json,
 } from "@remix-run/node";
 import AdminController from "~/controllers/AdminController";
-import { passwordMatch } from "~/validators";
+import { confirmPassword, passwordMatch, validateEmail } from "~/validators";
 import RoleController from "~/controllers/RoleController";
 import { useLoaderData, useActionData } from "@remix-run/react";
 import CustomTable from "~/components/custom/CustomTable";
@@ -105,10 +105,15 @@ export const action: ActionFunction = async ({ request }) => {
   switch (intent) {
     case "create": {
       const errors = {
-        password: passwordMatch(
+        password: passwordMatch(password),
+        confirmPassword: confirmPassword(
           password,
           formData.get("confirmPassword") as string
         ),
+        email: validateEmail(email),
+        phone: phone ? null : "Phone is required",
+        role: role ? null : "Role is required",
+        designation: role ? null : "Designation is required",
       };
 
       if (Object.values(errors).some(Boolean)) {

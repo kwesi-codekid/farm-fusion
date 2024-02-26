@@ -46,15 +46,18 @@ export const validateAddress = (address: string) => {
   return addressRegex.test(address);
 };
 
-export const passwordMatch = (password: string, confirmPassword: string) => {
+export const passwordMatch = (password: string) => {
   if (!password) {
     return "Password is required";
   }
 
+  return null;
+};
+
+export const confirmPassword = (password: string, confirmPassword: string) => {
   if (!confirmPassword) {
     return "Confirm password is required";
   }
-
   if (password !== confirmPassword) {
     return "Passwords do not match";
   }
