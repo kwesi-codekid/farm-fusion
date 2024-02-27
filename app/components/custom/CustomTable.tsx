@@ -22,8 +22,7 @@ import { DeleteIcon } from "~/assets/icons/DeleteIcon";
 import { PlusIcon } from "~/assets/icons/PlusIcon";
 import ConfirmModal from "./ConfirmModal";
 import CreateRecordModal from "./CreateRecordModal";
-import { useNavigate } from "@remix-run/react";
-import { set } from "mongoose";
+import { useNavigate, useLocation, Form } from "@remix-run/react";
 
 interface Column {
   key: string;
@@ -41,6 +40,7 @@ interface CustomTableProps {
   createRecordFormItems?: React.ReactNode;
   currentPage?: number;
   totalPages: number;
+  searchTerm?: string;
 }
 
 const CustomTable: React.FC<CustomTableProps> = ({
@@ -50,6 +50,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   createRecordFormItems,
   currentPage,
   totalPages,
+  searchTerm,
 }) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = React.useState(true);
@@ -98,28 +99,22 @@ const CustomTable: React.FC<CustomTableProps> = ({
     createRecordDisclosure.onOpen();
   };
 
-  const [searchText, setSearchText] = React.useState("");
-  useEffect(() => {
-    if (searchText) {
-      navigate(`?search_term=${searchText}`);
-    } else {
-      navigate(``);
-    }
-  }, [searchText]);
-
   // table top content
   const tableTopContent = (
     <div className="flex items-center justify-between">
-      <div className="w-1/4 rounded-xl flex items-center gap-2">
-        <Input
-          variant="bordered"
-          type="search"
-          placeholder="Search..."
-          name="search"
-          size="sm"
-          value={searchText}
-          onValueChange={setSearchText}
-        />
+      <div className="w-1/3 rounded-xl flex items-center gap-2">
+        <Form method="get" className="flex items-center justify-center gap-2">
+          <Input
+            className="rounded-xl"
+            name="search_term"
+            placeholder="Search"
+            defaultValue={searchTerm}
+            size="sm"
+          />
+          <Button color="primary" type="submit">
+            Search
+          </Button>
+        </Form>
       </div>
       <Button
         className="font-montserrat"
@@ -158,7 +153,14 @@ const CustomTable: React.FC<CustomTableProps> = ({
                 color="primary"
                 page={currentPage}
                 total={totalPages}
-                onChange={(page) => navigate(`?page=${page}`)}
+                onChange={(page) => {
+                  // check if there is a search term
+                  if (searchTerm) {
+                    navigate(`?page=${page}&search_term=${searchTerm}`);
+                  } else {
+                    navigate(`?page=${page}`);
+                  }
+                }}
               />
             </div>
           ) : null

@@ -21,7 +21,7 @@ import CustomSelect from "~/components/custom/CustomSelect";
 import { useEffect, useState } from "react";
 
 export default function Admins() {
-  const { admins, page, totalPages } = useLoaderData();
+  const { admins, page, totalPages, search_term } = useLoaderData();
   console.log(admins, page, totalPages);
 
   const actionData = useActionData();
@@ -136,6 +136,7 @@ export default function Admins() {
         items={adminsData}
         currentPage={page}
         totalPages={totalPages}
+        searchTerm={search_term}
       />
     </AdminLayout>
   );
