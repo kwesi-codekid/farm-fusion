@@ -28,8 +28,8 @@ const adminSchema = new Schema<AdminInterface>(
       required: false,
     },
     designation: {
-      type: Array,
-      default: [],
+      type: String,
+      required: false,
     },
   },
   {
