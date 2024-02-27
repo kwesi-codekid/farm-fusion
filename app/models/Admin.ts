@@ -1,45 +1,47 @@
+import { Schema } from "mongoose";
 import mongoose from "~/mongoose";
-import type { AdminInterface } from "../types";
+import { AdminInterface } from "~/types";
+const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
-const PermissionSchema = new mongoose.Schema({
-  name: String,
-  action: String,
-});
-
-const AdminSchema = new mongoose.Schema(
+// Create a Mongoose schema
+const adminSchema = new Schema<AdminInterface>(
   {
     firstName: String,
     lastName: String,
-    email: { type: String, unique: true },
-    username: String,
     password: {
       type: String,
       required: true,
     },
-    phone: String,
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      match: [emailRegex, "Invalid email format"],
+    },
+    phone: {
+      type: String,
+      required: false,
+      unique: true,
+    },
     role: {
       type: String,
-      enum: ["employee", "admin"],
-      default: "employee",
+      required: false,
     },
-    permissions: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "permissions",
-      },
-    ],
+    designation: {
+      type: String,
+      required: false,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
 let Admin: mongoose.Model<AdminInterface>;
-let Permissions: mongoose.Model<AdminInterface>;
 try {
   Admin = mongoose.model<AdminInterface>("admins");
-  Permissions = mongoose.model<any>("permissions");
 } catch (error) {
-  Admin = mongoose.model<AdminInterface>("admins", AdminSchema);
-  Permissions = mongoose.model<any>("permissions", PermissionSchema);
+  Admin = mongoose.model<AdminInterface>("admins", adminSchema);
 }
 
-export { PermissionSchema, AdminSchema, Permissions, Admin };
+export default Admin;

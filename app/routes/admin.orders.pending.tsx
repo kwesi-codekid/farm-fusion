@@ -1,11 +1,11 @@
 import AdminLayout from "~/layouts/adminLayout";
 
-const PendingOrders = () => {
+const AdminOrdersPending = () => {
   return (
     <AdminLayout>
-      <p>Pending orders</p>
+      <h1>Pending Orders</h1>
     </AdminLayout>
   );
 };
 
-export default PendingOrders;
+export default AdminOrdersPending;

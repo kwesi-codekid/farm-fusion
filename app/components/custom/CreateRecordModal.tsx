@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Modal,
   ModalContent,
@@ -6,52 +7,61 @@ import {
   ModalFooter,
   Button,
 } from "@nextui-org/react";
-import { Form, useSubmit } from "@remix-run/react";
-import { useState } from "react";
+import { Form, useSubmit, useNavigation } from "@remix-run/react";
+import { useEffect } from "react";
 
 const CreateRecordModal = ({
   isModalOpen,
   onCloseModal,
   title,
   children,
+  list,
 }: {
   isModalOpen: boolean;
   onCloseModal: () => void;
   title: string;
   children: React.ReactNode;
+  list?: any;
 }) => {
   // state to handle loading
-  const [isLoading, setIsLoading] = useState(false);
+  const navigation = useNavigation();
+  const isLoading =
+    navigation.state === "submitting" || navigation.state === "loading";
+
   const submit = useSubmit();
 
   // function to handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
       e.preventDefault();
-      setIsLoading(true);
       const formData = new FormData(e.currentTarget);
       const formValues: { [key: string]: string } = {};
 
       for (const [key, value] of formData.entries()) {
         formValues[key] = value as string;
       }
-      //   stimulate a network request
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log(formValues);
+
       submit(
         {
+          path: location.pathname + location.search,
+          intent: "create",
           ...formValues,
         },
         {
           method: "POST",
+          replace: true,
         }
       );
-      setIsLoading(false);
-      onCloseModal();
     } catch (error) {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    if (navigation.state === "idle") {
+      onCloseModal();
+    }
+  }, [navigation, onCloseModal]);
 
   return (
     <Modal
@@ -63,7 +73,7 @@ const CreateRecordModal = ({
       motionProps={{
         variants: {
           enter: {
-            y: -20,
+            scale: [1, 0.9],
             opacity: 1,
             transition: {
               duration: 0.3,
@@ -71,7 +81,7 @@ const CreateRecordModal = ({
             },
           },
           exit: {
-            y: 0,
+            scale: [0.9, 1],
             opacity: 0,
             transition: {
               duration: 0.2,
@@ -93,12 +103,18 @@ const CreateRecordModal = ({
               </Form>
             </ModalBody>
             <ModalFooter>
-              <Button color="danger" variant="flat" onPress={onCloseModal}>
+              <Button
+                className="font-montserrat"
+                color="danger"
+                variant="flat"
+                onPress={onCloseModal}
+              >
                 Cancel
               </Button>
               <Button
-                color="primary"
                 isLoading={isLoading}
+                className="font-montserrat"
+                color="primary"
                 type="submit"
                 form="form"
               >

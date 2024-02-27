@@ -10,7 +10,6 @@ import { navLinks } from "~/data/nav-links";
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const { pathname } = useLocation();
-  console.log(pathname);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (

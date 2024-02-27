@@ -67,7 +67,7 @@ const ConfirmModal = ({
       motionProps={{
         variants: {
           enter: {
-            y: -20,
+            scale: [1, 0.9],
             opacity: 1,
             transition: {
               duration: 0.3,
@@ -75,7 +75,7 @@ const ConfirmModal = ({
             },
           },
           exit: {
-            y: 0,
+            scale: [0.9, 1],
             opacity: 0,
             transition: {
               duration: 0.2,
@@ -88,7 +88,9 @@ const ConfirmModal = ({
       <ModalContent>
         {(onCloseModal) => (
           <>
-            <ModalHeader className="flex flex-col gap-1">{title}</ModalHeader>
+            <ModalHeader className="flex flex-col gap-1">
+              <h3 className="font-montserrat">{title}</h3>
+            </ModalHeader>
             <ModalBody>
               <Form
                 method={formMethod}
