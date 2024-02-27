@@ -78,7 +78,6 @@ export const validateFirstName = (firstName: string) => {
     return "First name should contain only letters.";
   }
 
-  // Validation passed
   return null;
 };
 
@@ -95,16 +94,5 @@ export const validateLastName = (lastName: string) => {
     return "Last name should contain only letters.";
   }
 
-  // Validation passed
   return null;
 };
-
-// // Example usage:
-// const firstName = "John";
-// const lastName = "Doe";
-
-// const firstNameValidationMessage = validateFirstName(firstName);
-// const lastNameValidationMessage = validateLastName(lastName);
-
-// console.log(firstNameValidationMessage);
-// console.log(lastNameValidationMessage);

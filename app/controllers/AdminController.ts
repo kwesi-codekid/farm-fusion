@@ -337,8 +337,39 @@ export default class AdminController {
     const searchFilter = search_term
       ? {
           $or: [
-            { name: { $regex: search_term, $options: "i" } }, // Case-insensitive search for email
-            { description: { $regex: search_term, $options: "i" } }, // Case-insensitive search for username
+            {
+              firstName: {
+                $regex: new RegExp(
+                  search_term
+                    .split(" ")
+                    .map((term) => `(?=.*${term})`)
+                    .join(""),
+                  "i"
+                ),
+              },
+            },
+            {
+              lastName: {
+                $regex: new RegExp(
+                  search_term
+                    .split(" ")
+                    .map((term) => `(?=.*${term})`)
+                    .join(""),
+                  "i"
+                ),
+              },
+            },
+            {
+              email: {
+                $regex: new RegExp(
+                  search_term
+                    .split(" ")
+                    .map((term) => `(?=.*${term})`)
+                    .join(""),
+                  "i"
+                ),
+              },
+            },
           ],
         }
       : {};
