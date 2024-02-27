@@ -102,26 +102,6 @@ export default function Admins() {
     </div>
   );
 
-  // search
-  const [searchTerm, setSearchTerm] = useState("");
-  useEffect(() => {
-    if (searchTerm) {
-      const filteredData = adminsData.filter((admin) => {
-        return (
-          admin.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          admin.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          admin.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          admin.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          admin.role.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      });
-
-      setAdminsData(filteredData);
-    } else {
-      setAdminsData(admins);
-    }
-  }, [searchTerm, admins]);
-
   return (
     <AdminLayout>
       <CustomTable
@@ -156,8 +136,6 @@ export default function Admins() {
         items={adminsData}
         currentPage={page}
         totalPages={totalPages}
-        searchText={searchTerm}
-        setSearchText={setSearchTerm}
       />
     </AdminLayout>
   );
@@ -267,6 +245,8 @@ export const loader: LoaderFunction = async ({ request }) => {
     // from,
     // to,
   });
+
+  console.log({ page, totalPages });
 
   const roleController = new RoleController(request);
   const { roles } = await roleController.getRoles({});
