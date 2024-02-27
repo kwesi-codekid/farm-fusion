@@ -15,24 +15,18 @@ const CreateRecordModal = ({
   onCloseModal,
   title,
   children,
-  actionData,
+  list,
 }: {
   isModalOpen: boolean;
   onCloseModal: () => void;
   title: string;
   children: React.ReactNode;
-  actionData?: any;
+  list?: any;
 }) => {
   // state to handle loading
   const navigation = useNavigation();
   const isLoading =
     navigation.state === "submitting" || navigation.state === "loading";
-
-  useEffect(() => {
-    if (!actionData) {
-      onCloseModal();
-    }
-  }, [actionData, onCloseModal]);
 
   const submit = useSubmit();
 
@@ -55,12 +49,19 @@ const CreateRecordModal = ({
         },
         {
           method: "POST",
+          replace: true,
         }
       );
     } catch (error) {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    if (navigation.state === "idle") {
+      onCloseModal();
+    }
+  }, [navigation, onCloseModal]);
 
   return (
     <Modal

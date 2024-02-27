@@ -13,6 +13,7 @@ import {
   useDisclosure,
   Button,
   Input,
+  Pagination,
 } from "@nextui-org/react";
 import { useAsyncList } from "@react-stately/data";
 import { EyeOutlined } from "~/assets/icons/EyeOutlined";
@@ -21,6 +22,8 @@ import { DeleteIcon } from "~/assets/icons/DeleteIcon";
 import { PlusIcon } from "~/assets/icons/PlusIcon";
 import ConfirmModal from "./ConfirmModal";
 import CreateRecordModal from "./CreateRecordModal";
+import { useNavigate } from "@remix-run/react";
+import { set } from "mongoose";
 
 interface Column {
   key: string;
@@ -36,6 +39,8 @@ interface CustomTableProps {
   columns: Column[];
   addButtonText: string;
   createRecordFormItems?: React.ReactNode;
+  currentPage?: number;
+  totalPages: number;
 }
 
 const CustomTable: React.FC<CustomTableProps> = ({
@@ -43,7 +48,10 @@ const CustomTable: React.FC<CustomTableProps> = ({
   columns,
   addButtonText,
   createRecordFormItems,
+  currentPage,
+  totalPages,
 }) => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = React.useState(true);
 
   const list = useAsyncList({
@@ -90,10 +98,29 @@ const CustomTable: React.FC<CustomTableProps> = ({
     createRecordDisclosure.onOpen();
   };
 
+  const [searchText, setSearchText] = React.useState("");
+  useEffect(() => {
+    if (searchText) {
+      navigate(`?search_term=${searchText}`);
+    } else {
+      navigate(``);
+    }
+  }, [searchText]);
+
   // table top content
   const tableTopContent = (
     <div className="flex items-center justify-between">
-      <h2 className="text-2xl font-bold font-montserrat">Users</h2>
+      <div className="w-1/4 rounded-xl flex items-center gap-2">
+        <Input
+          variant="bordered"
+          type="search"
+          placeholder="Search..."
+          name="search"
+          size="sm"
+          value={searchText}
+          onValueChange={setSearchText}
+        />
+      </div>
       <Button
         className="font-montserrat"
         size="sm"
@@ -108,19 +135,42 @@ const CustomTable: React.FC<CustomTableProps> = ({
   );
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
+      {tableTopContent}
       <Table
         aria-label="Custom data table"
-        topContent={tableTopContent}
         sortDescriptor={list.sortDescriptor}
         onSortChange={list.sort}
+        removeWrapper
+        className="h-[50vh]"
         classNames={{
           table: "w-full",
+          // thead: "relative -top-4",
         }}
+        isHeaderSticky
+        bottomContent={
+          totalPages > 0 ? (
+            <div className="flex w-full items-center">
+              <Pagination
+                isCompact
+                showControls
+                showShadow
+                color="primary"
+                page={currentPage}
+                total={totalPages}
+                onChange={(page) => navigate(`?page=${page}`)}
+              />
+            </div>
+          ) : null
+        }
       >
         <TableHeader>
           {columns.map((column) => (
-            <TableColumn key={column.key} allowsSorting>
+            <TableColumn
+              className="font-montserrat"
+              key={column.key}
+              allowsSorting
+            >
               {column.name}
             </TableColumn>
           ))}

@@ -31,7 +31,7 @@ const CustomSelect = ({
       required={isRequired}
     >
       {(item) => (
-        <SelectItem key={item.id} textValue={item.value}>
+        <SelectItem key={item.value} value={item.value} textValue={item.label}>
           <Chip color={item.chipColor} variant="flat" className="font-nunito">
             {item.label}
           </Chip>

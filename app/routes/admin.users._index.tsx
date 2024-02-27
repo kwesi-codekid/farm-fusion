@@ -21,7 +21,9 @@ import CustomSelect from "~/components/custom/CustomSelect";
 import { useEffect, useState } from "react";
 
 export default function Admins() {
-  const { admins } = useLoaderData();
+  const { admins, page, totalPages } = useLoaderData();
+  console.log(admins, page, totalPages);
+
   const actionData = useActionData();
   useEffect(() => {
     if (actionData) {
@@ -41,14 +43,14 @@ export default function Admins() {
         isRequired={true}
         label="First Name"
         name="firstName"
-        // isInvalid={actionData?.errors?.firstName ? true : false}
-        // errorMessage={actionData?.errors?.firstName}
+        isInvalid={actionData?.errors?.firstName ? true : false}
+        errorMessage={actionData?.errors?.firstName}
       />
       <CustomInput
         label="Last Name"
         name="lastName"
-        // isInvalid={actionData?.errors?.lastName ? true : false}
-        // errorMessage={actionData?.errors?.lastName}
+        isInvalid={actionData?.errors?.lastName ? true : false}
+        errorMessage={actionData?.errors?.lastName}
       />
       <CustomInput
         label="Email"
@@ -100,6 +102,26 @@ export default function Admins() {
     </div>
   );
 
+  // search
+  const [searchTerm, setSearchTerm] = useState("");
+  useEffect(() => {
+    if (searchTerm) {
+      const filteredData = adminsData.filter((admin) => {
+        return (
+          admin.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          admin.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          admin.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          admin.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          admin.role.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      });
+
+      setAdminsData(filteredData);
+    } else {
+      setAdminsData(admins);
+    }
+  }, [searchTerm, admins]);
+
   return (
     <AdminLayout>
       <CustomTable
@@ -132,6 +154,10 @@ export default function Admins() {
           },
         ]}
         items={adminsData}
+        currentPage={page}
+        totalPages={totalPages}
+        searchText={searchTerm}
+        setSearchText={setSearchTerm}
       />
     </AdminLayout>
   );
