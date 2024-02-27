@@ -160,15 +160,12 @@ const CustomTable: React.FC<CustomTableProps> = ({
                   let baseUrl = location.pathname + location.search;
                   const regex = /([?&]page=)\d+/g;
 
-                  // Check if baseUrl already contains a 'page' parameter
                   if (
                     baseUrl.includes("?page=") ||
                     baseUrl.includes("&page=")
                   ) {
-                    // If it does, replace the existing page parameter with the new page number
                     baseUrl = baseUrl.replace(regex, `$1${page}`);
                   } else {
-                    // If it doesn't, append the new page parameter to the baseUrl
                     baseUrl += baseUrl.includes("?")
                       ? `&page=${page}`
                       : `?page=${page}`;
