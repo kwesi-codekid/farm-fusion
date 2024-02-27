@@ -237,6 +237,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   const adminControlle = await new AdminController(request);
   const user = await adminControlle.getAdmin();
+  console.log(search_term);
 
   const { admins, totalPages } = await adminControlle.getAdmins({
     page,

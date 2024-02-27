@@ -374,7 +374,7 @@ export default class AdminController {
         }
       : {};
 
-    const totalEmployeeCount = await Admin.countDocuments({}).exec();
+    const totalEmployeeCount = await Admin.countDocuments(searchFilter).exec();
     const totalPages = Math.ceil(totalEmployeeCount / limit);
 
     try {
