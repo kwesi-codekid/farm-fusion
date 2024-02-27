@@ -158,7 +158,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                 total={totalPages}
                 onChange={(page) => {
                   let baseUrl = location.pathname + location.search;
-                  let regex = /([?&]page=)\d+/g;
+                  const regex = /([?&]page=)\d+/g;
 
                   // Check if baseUrl already contains a 'page' parameter
                   if (
@@ -173,8 +173,6 @@ const CustomTable: React.FC<CustomTableProps> = ({
                       ? `&page=${page}`
                       : `?page=${page}`;
                   }
-
-                  // check if there is a search term
 
                   navigate(baseUrl);
                 }}
