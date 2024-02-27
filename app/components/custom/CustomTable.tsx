@@ -40,7 +40,6 @@ interface CustomTableProps {
   createRecordFormItems?: React.ReactNode;
   currentPage?: number;
   totalPages: number;
-  searchTerm?: string;
 }
 
 const CustomTable: React.FC<CustomTableProps> = ({
@@ -50,7 +49,6 @@ const CustomTable: React.FC<CustomTableProps> = ({
   createRecordFormItems,
   currentPage,
   totalPages,
-  searchTerm,
 }) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = React.useState(true);
@@ -99,6 +97,11 @@ const CustomTable: React.FC<CustomTableProps> = ({
     createRecordDisclosure.onOpen();
   };
 
+  // search term
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const searchTerm = searchParams.get("search_term");
+
   // table top content
   const tableTopContent = (
     <div className="flex items-center justify-between">
@@ -108,7 +111,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
             className="rounded-xl"
             name="search_term"
             placeholder="Search"
-            defaultValue={searchTerm}
+            defaultValue={searchTerm || ""}
             size="sm"
           />
           <Button color="primary" type="submit">
@@ -154,12 +157,24 @@ const CustomTable: React.FC<CustomTableProps> = ({
                 page={currentPage}
                 total={totalPages}
                 onChange={(page) => {
-                  // check if there is a search term
-                  if (searchTerm) {
-                    navigate(`?page=${page}&search_term=${searchTerm}`);
+                  let baseUrl = location.pathname + location.search;
+                  const regex = /([?&]page=)\d+/g;
+
+                  // Check if baseUrl already contains a 'page' parameter
+                  if (
+                    baseUrl.includes("?page=") ||
+                    baseUrl.includes("&page=")
+                  ) {
+                    // If it does, replace the existing page parameter with the new page number
+                    baseUrl = baseUrl.replace(regex, `$1${page}`);
                   } else {
-                    navigate(`?page=${page}`);
+                    // If it doesn't, append the new page parameter to the baseUrl
+                    baseUrl += baseUrl.includes("?")
+                      ? `&page=${page}`
+                      : `?page=${page}`;
                   }
+
+                  navigate(baseUrl);
                 }}
               />
             </div>
