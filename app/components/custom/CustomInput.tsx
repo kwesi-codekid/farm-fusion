@@ -7,6 +7,7 @@ const CustomInput = ({
   errorMessage,
   isRequired,
   type,
+  defaultValue,
 }: {
   label: string;
   name: string;
@@ -14,6 +15,7 @@ const CustomInput = ({
   isInvalid?: boolean;
   errorMessage?: string;
   isRequired?: boolean;
+  defaultValue?: string;
 }) => {
   return (
     <Input
@@ -31,6 +33,7 @@ const CustomInput = ({
       errorMessage={errorMessage}
       required={isRequired}
       type={type}
+      defaultValue={defaultValue}
     />
   );
 };
