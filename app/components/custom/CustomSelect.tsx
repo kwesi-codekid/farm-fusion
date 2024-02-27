@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Select, SelectItem, Chip } from "@nextui-org/react";
 
 const CustomSelect = ({
@@ -7,6 +8,7 @@ const CustomSelect = ({
   isInvalid,
   errorMessage,
   isRequired,
+  defaultKey,
 }: {
   label: string;
   name: string;
@@ -19,6 +21,7 @@ const CustomSelect = ({
   isInvalid?: boolean;
   errorMessage?: string;
   isRequired?: boolean;
+  defaultKey?: any;
 }) => {
   return (
     <Select
@@ -29,6 +32,18 @@ const CustomSelect = ({
       isInvalid={isInvalid}
       errorMessage={errorMessage}
       required={isRequired}
+      defaultSelectedKeys={[defaultKey]}
+      renderValue={(items) => {
+        return (
+          <div className="py-2">
+            {items.map((item) => (
+              <Chip variant="flat" size="sm" key={item.key}>
+                {item.data.label}
+              </Chip>
+            ))}
+          </div>
+        );
+      }}
     >
       {(item) => (
         <SelectItem key={item.value} value={item.value} textValue={item.label}>

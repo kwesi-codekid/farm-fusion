@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -22,7 +22,8 @@ import { DeleteIcon } from "~/assets/icons/DeleteIcon";
 import { PlusIcon } from "~/assets/icons/PlusIcon";
 import ConfirmModal from "./ConfirmModal";
 import CreateRecordModal from "./CreateRecordModal";
-import { useNavigate, useLocation, Form } from "@remix-run/react";
+import EditRecordModal from "./EditRecordModal";
+import { useNavigate, Form } from "@remix-run/react";
 
 interface Column {
   key: string;
@@ -38,8 +39,12 @@ interface CustomTableProps {
   columns: Column[];
   addButtonText: string;
   createRecordFormItems?: React.ReactNode;
+  editRecordFormItems?: React.ReactNode;
+  editRecord: any;
+  setEditRecord: (record: any) => void;
   currentPage?: number;
   totalPages: number;
+  searchTerm?: string;
 }
 
 const CustomTable: React.FC<CustomTableProps> = ({
@@ -47,8 +52,12 @@ const CustomTable: React.FC<CustomTableProps> = ({
   columns,
   addButtonText,
   createRecordFormItems,
+  editRecordFormItems,
+  editRecord,
+  setEditRecord,
   currentPage,
   totalPages,
+  searchTerm,
 }) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = React.useState(true);
@@ -86,7 +95,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   // delete record stuff
   const deleteDisclosure = useDisclosure();
   const [deleteId, setDeleteId] = React.useState<string>("");
-  const openDeleteModal = (deleteId) => {
+  const openDeleteModal = (deleteId: string) => {
     setDeleteId(deleteId);
     deleteDisclosure.onOpen();
   };
@@ -97,10 +106,12 @@ const CustomTable: React.FC<CustomTableProps> = ({
     createRecordDisclosure.onOpen();
   };
 
-  // search term
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const searchTerm = searchParams.get("search_term");
+  // edit record stuff
+  const editRecordDisclosure = useDisclosure();
+  const openEditRecordModal = (record: any) => {
+    setEditRecord(record);
+    editRecordDisclosure.onOpen();
+  };
 
   // table top content
   const tableTopContent = (
@@ -109,19 +120,27 @@ const CustomTable: React.FC<CustomTableProps> = ({
         <Form method="get" className="flex items-center justify-center gap-2">
           <Input
             className="rounded-xl"
+            classNames={{
+              inputWrapper: "!h-10",
+            }}
             name="search_term"
-            placeholder="Search"
-            defaultValue={searchTerm || ""}
+            radius="lg"
+            defaultValue={searchTerm}
             size="sm"
           />
-          <Button color="primary" type="submit">
+          <Button
+            className="h-10 font-montserrat"
+            color="primary"
+            variant="flat"
+            type="submit"
+          >
             Search
           </Button>
         </Form>
       </div>
       <Button
         className="font-montserrat"
-        size="sm"
+        size="md"
         color="primary"
         startContent={<PlusIcon />}
         onPress={openCreateRecordModal}
@@ -150,7 +169,6 @@ const CustomTable: React.FC<CustomTableProps> = ({
           totalPages > 0 ? (
             <div className="flex w-full items-center">
               <Pagination
-                isCompact
                 showControls
                 showShadow
                 color="primary"
@@ -158,7 +176,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                 total={totalPages}
                 onChange={(page) => {
                   let baseUrl = location.pathname + location.search;
-                  const regex = /([?&]page=)\d+/g;
+                  let regex = /([?&]page=)\d+/g;
 
                   if (
                     baseUrl.includes("?page=") ||
@@ -218,6 +236,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                           color="primary"
                           isIconOnly
                           size="sm"
+                          onClick={() => openEditRecordModal(item)}
                         >
                           <EditIcon className="size-4" />
                         </Button>
@@ -249,16 +268,26 @@ const CustomTable: React.FC<CustomTableProps> = ({
 
       {/* create modal */}
       <CreateRecordModal
-        title="Create User"
+        title="Create Record"
         isModalOpen={createRecordDisclosure.isOpen}
         onCloseModal={createRecordDisclosure.onClose}
       >
         {createRecordFormItems}
       </CreateRecordModal>
 
+      {/* edit modal */}
+      <EditRecordModal
+        record={editRecord}
+        title="Edit Record"
+        isModalOpen={editRecordDisclosure.isOpen}
+        onCloseModal={editRecordDisclosure.onClose}
+      >
+        {editRecordFormItems}
+      </EditRecordModal>
+
       {/* delete modal */}
       <ConfirmModal
-        title="Delete User"
+        title="Delete Record"
         isModalOpen={deleteDisclosure.isOpen}
         onCloseModal={deleteDisclosure.onClose}
         formMethod="POST"

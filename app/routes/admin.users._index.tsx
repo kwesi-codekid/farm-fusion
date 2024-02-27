@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 
 export default function Admins() {
   const { admins, page, totalPages, search_term } = useLoaderData();
+  console.log(admins, page, totalPages);
 
   const actionData = useActionData();
   useEffect(() => {
@@ -35,6 +36,8 @@ export default function Admins() {
   useEffect(() => {
     setAdminsData(admins);
   }, [admins, adminsData]);
+
+  const [editItem, setEditItem] = useState({});
 
   const createAdminFormItems = (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -101,10 +104,84 @@ export default function Admins() {
     </div>
   );
 
+  const editAdminFormItems = (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <input type="text" name="_id" value={editItem?._id} className="hidden" />
+      <CustomInput
+        isRequired={true}
+        label="First Name"
+        name="firstName"
+        isInvalid={actionData?.errors?.firstName ? true : false}
+        errorMessage={actionData?.errors?.firstName}
+        defaultValue={editItem?.firstName}
+      />
+      <CustomInput
+        label="Last Name"
+        name="lastName"
+        isInvalid={actionData?.errors?.lastName ? true : false}
+        errorMessage={actionData?.errors?.lastName}
+        defaultValue={editItem?.lastName}
+      />
+      <CustomInput
+        label="Email"
+        name="email"
+        type="email"
+        isInvalid={actionData?.errors?.email ? true : false}
+        errorMessage={actionData?.errors?.email}
+        defaultValue={editItem?.email}
+      />
+      <CustomInput
+        label="Phone"
+        name="phone"
+        isInvalid={actionData?.errors?.phone ? true : false}
+        errorMessage={actionData?.errors?.phone}
+        defaultValue={editItem?.phone}
+      />
+      <CustomInput
+        isInvalid={actionData?.errors?.password ? true : false}
+        errorMessage={actionData?.errors?.password}
+        label="Password"
+        name="password"
+        type="password"
+      />
+      <CustomInput
+        label="Confirm Password"
+        name="confirmPassword"
+        type="password"
+        isInvalid={actionData?.errors?.confirmPassword ? true : false}
+        errorMessage={actionData?.errors?.confirmPassword}
+      />
+      <CustomSelect
+        label="Role"
+        name="role"
+        isInvalid={actionData?.errors?.role ? true : false}
+        errorMessage={actionData?.errors?.role}
+        defaultKey={editItem.role}
+        items={[
+          {
+            value: "admin",
+            label: "Admin",
+            id: "admin",
+            chipColor: "primary",
+          },
+          {
+            value: "super admin",
+            label: "Super Admin",
+            id: "super-admin",
+            chipColor: "secondary",
+          },
+        ]}
+      />
+    </div>
+  );
+
   return (
     <AdminLayout>
       <CustomTable
+        editRecord={editItem}
+        setEditRecord={setEditItem}
         createRecordFormItems={createAdminFormItems}
+        editRecordFormItems={editAdminFormItems}
         addButtonText="Add User"
         columns={[
           {
@@ -135,6 +212,7 @@ export default function Admins() {
         items={adminsData}
         currentPage={page}
         totalPages={totalPages}
+        searchTerm={search_term}
       />
     </AdminLayout>
   );

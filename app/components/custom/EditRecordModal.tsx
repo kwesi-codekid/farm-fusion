@@ -10,7 +10,7 @@ import {
 import { Form, useSubmit, useNavigation } from "@remix-run/react";
 import { useEffect } from "react";
 
-const CreateRecordModal = ({
+const EditRecordModal = ({
   isModalOpen,
   onCloseModal,
   title,
@@ -20,6 +20,7 @@ const CreateRecordModal = ({
   onCloseModal: () => void;
   title: string;
   children: React.ReactNode;
+  record: any;
 }) => {
   // state to handle loading
   const navigation = useNavigation();
@@ -42,7 +43,7 @@ const CreateRecordModal = ({
       submit(
         {
           path: location.pathname + location.search,
-          intent: "create",
+          intent: "update",
           ...formValues,
         },
         {
@@ -126,4 +127,4 @@ const CreateRecordModal = ({
   );
 };
 
-export default CreateRecordModal;
+export default EditRecordModal;
