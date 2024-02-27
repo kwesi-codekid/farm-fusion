@@ -331,7 +331,7 @@ export default class AdminController {
     page: number;
     search_term: string;
   }): Promise<{ admins: AdminInterface[]; totalPages: number }> => {
-    const limit = 10; // Number of orders per page
+    const limit = 3; // Number of orders per page
     const skipCount = (page - 1) * limit; // Calculate the number of documents to skip
 
     const searchFilter = search_term
@@ -374,7 +374,7 @@ export default class AdminController {
         }
       : {};
 
-    const totalEmployeeCount = await Admin.countDocuments({}).exec();
+    const totalEmployeeCount = await Admin.countDocuments(searchFilter).exec();
     const totalPages = Math.ceil(totalEmployeeCount / limit);
 
     try {
