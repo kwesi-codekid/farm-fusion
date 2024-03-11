@@ -249,150 +249,154 @@ export default function Inventory() {
 
   return (
     <AdminLayout>
-      {tableTopContent}
-      <Table
-        aria-label="Students Table"
-        sortDescriptor={list.sortDescriptor}
-        onSortChange={list.sort}
-        isHeaderSticky
-        classNames={{
-          wrapper: "dark:!bg-slate-900/80 bg-white/80",
-        }}
-        bottomContent={
-          totalPages > 1 ? (
-            <div className="flex w-full items-center">
-              <Pagination
-                showControls
-                showShadow
-                color="primary"
-                page={page}
-                total={totalPages}
-                onChange={(page) => {
-                  let baseUrl = location.pathname + location.search;
-                  const regex = /([?&]page=)\d+/g;
+      <section className="p-4 flex flex-col gap-4">
+        {tableTopContent}
+        <Table
+          aria-label="Students Table"
+          sortDescriptor={list.sortDescriptor}
+          onSortChange={list.sort}
+          isHeaderSticky
+          classNames={{
+            wrapper: "dark:!bg-slate-900/80 bg-white/80",
+          }}
+          bottomContent={
+            totalPages > 1 ? (
+              <div className="flex w-full items-center">
+                <Pagination
+                  showControls
+                  showShadow
+                  color="primary"
+                  page={page}
+                  total={totalPages}
+                  onChange={(page) => {
+                    let baseUrl = location.pathname + location.search;
+                    const regex = /([?&]page=)\d+/g;
 
-                  if (
-                    baseUrl.includes("?page=") ||
-                    baseUrl.includes("&page=")
-                  ) {
-                    baseUrl = baseUrl.replace(regex, `$1${page}`);
-                  } else {
-                    baseUrl += baseUrl.includes("?")
-                      ? `&page=${page}`
-                      : `?page=${page}`;
-                  }
+                    if (
+                      baseUrl.includes("?page=") ||
+                      baseUrl.includes("&page=")
+                    ) {
+                      baseUrl = baseUrl.replace(regex, `$1${page}`);
+                    } else {
+                      baseUrl += baseUrl.includes("?")
+                        ? `&page=${page}`
+                        : `?page=${page}`;
+                    }
 
-                  navigate(baseUrl);
-                }}
-              />
-            </div>
-          ) : null
-        }
-      >
-        <TableHeader className="!bg-blue-500">
-          {inventoryColumns.map((column) => (
-            <TableColumn
-              className="font-montserrat bg-slate-700 dark:bg-slate-900 text-white"
-              key={column.key}
-              allowsSorting
-            >
-              {column.title}
-            </TableColumn>
-          ))}
-        </TableHeader>
-        <TableBody
-          // items={list.items}
-          isLoading={isLoading}
-          loadingContent={<Spinner label="Loading..." />}
-          emptyContent={
-            isLoading ? (
-              <></>
-            ) : (
-              <div className="flex items-center justify-center flex-col gap-3">
-                <img src={emptyFolderSVG} alt="No data" />
-                <p className="font-nunito text-lg md:text-xl">
-                  No records found
-                </p>
+                    navigate(baseUrl);
+                  }}
+                />
               </div>
-            )
+            ) : null
           }
         >
-          {list.items.map((inventory: any, index) => (
-            <TableRow key={index}>
-              <TableCell className="font-nunito text-sm">
-                {new Date(inventory.stockDate)
-                  .toLocaleDateString("en-GB")
-                  .replace(/\//g, "-")}
-              </TableCell>
-              <TableCell className="font-nunito text-sm">
-                {inventory.quantity}
-              </TableCell>
-              <TableCell className="font-nunito text-sm">
-                {inventory.description}
-              </TableCell>
-              <TableCell className="font-nunito text-sm">
-                {inventory.location}
-              </TableCell>
-              <TableCell className="font-nunito text-sm">
-                <Chip
-                  variant="flat"
-                  classNames={{
-                    content: "font-nunito text-xs",
-                  }}
-                  size="sm"
-                  color={
-                    inventory.availability === "in-stock" ? "success" : "danger"
-                  }
-                >
-                  {inventory.availability}
-                </Chip>
-              </TableCell>
-              <TableCell>
-                <div className="relative flex items-center">
-                  <Tooltip content="Details">
-                    <Button
-                      variant="light"
-                      radius="full"
-                      color="default"
-                      isIconOnly
-                      size="sm"
-                      onPress={() => {
-                        navigate(`/admin/inventory/${inventory._id}`);
-                      }}
-                    >
-                      <EyeOutlined className="size-4" />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip content="Edit user">
-                    <Button
-                      variant="light"
-                      radius="full"
-                      color="primary"
-                      isIconOnly
-                      size="sm"
-                      onClick={() => openEditRecordModal(inventory)}
-                    >
-                      <EditIcon className="size-4" />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip color="danger" content="Delete user">
-                    <Button
-                      onClick={() => openDeleteModal(inventory._id)}
-                      variant="light"
-                      radius="full"
-                      color="danger"
-                      isIconOnly
-                      size="sm"
-                    >
-                      <DeleteIcon className="size-4" />
-                    </Button>
-                  </Tooltip>
+          <TableHeader className="!bg-blue-500">
+            {inventoryColumns.map((column) => (
+              <TableColumn
+                className="font-montserrat bg-slate-700 dark:bg-slate-900 text-white"
+                key={column.key}
+                allowsSorting
+              >
+                {column.title}
+              </TableColumn>
+            ))}
+          </TableHeader>
+          <TableBody
+            // items={list.items}
+            isLoading={isLoading}
+            loadingContent={<Spinner label="Loading..." />}
+            emptyContent={
+              isLoading ? (
+                <></>
+              ) : (
+                <div className="flex items-center justify-center flex-col gap-3">
+                  <img src={emptyFolderSVG} alt="No data" />
+                  <p className="font-nunito text-lg md:text-xl">
+                    No records found
+                  </p>
                 </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+              )
+            }
+          >
+            {list.items.map((inventory: any, index) => (
+              <TableRow key={index}>
+                <TableCell className="font-nunito text-sm">
+                  {new Date(inventory.stockDate)
+                    .toLocaleDateString("en-GB")
+                    .replace(/\//g, "-")}
+                </TableCell>
+                <TableCell className="font-nunito text-sm">
+                  {inventory.quantity}
+                </TableCell>
+                <TableCell className="font-nunito text-sm">
+                  {inventory.description}
+                </TableCell>
+                <TableCell className="font-nunito text-sm">
+                  {inventory.location}
+                </TableCell>
+                <TableCell className="font-nunito text-sm">
+                  <Chip
+                    variant="flat"
+                    classNames={{
+                      content: "font-nunito text-xs",
+                    }}
+                    size="sm"
+                    color={
+                      inventory.availability === "in-stock"
+                        ? "success"
+                        : "danger"
+                    }
+                  >
+                    {inventory.availability}
+                  </Chip>
+                </TableCell>
+                <TableCell>
+                  <div className="relative flex items-center">
+                    <Tooltip content="Details">
+                      <Button
+                        variant="light"
+                        radius="full"
+                        color="default"
+                        isIconOnly
+                        size="sm"
+                        onPress={() => {
+                          navigate(`/admin/inventory/${inventory._id}`);
+                        }}
+                      >
+                        <EyeOutlined className="size-4" />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip content="Edit user">
+                      <Button
+                        variant="light"
+                        radius="full"
+                        color="primary"
+                        isIconOnly
+                        size="sm"
+                        onClick={() => openEditRecordModal(inventory)}
+                      >
+                        <EditIcon className="size-4" />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip color="danger" content="Delete user">
+                      <Button
+                        onClick={() => openDeleteModal(inventory._id)}
+                        variant="light"
+                        radius="full"
+                        color="danger"
+                        isIconOnly
+                        size="sm"
+                      >
+                        <DeleteIcon className="size-4" />
+                      </Button>
+                    </Tooltip>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </section>
 
       {/* create modal */}
       <CreateRecordModal
