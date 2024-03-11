@@ -1,10 +1,9 @@
 import { redirect } from "@remix-run/node";
-import type { ProductInterface } from "../types";
-import { commitSession, getSession } from "~/session";
-import { Category, Product, ProductImage } from "../models/Product";
-import { RestockHistory } from "../models/RestockHistory";
+import type { InventoryInterface } from "../types";
+import { commitFlashSession, getFlashSession } from "~/flash-session";
+import Inventory from "~/models/Inventory";
 
-export default class ProductController {
+export default class InventoryController {
   private request: Request;
 
   constructor(request: Request) {
@@ -12,11 +11,11 @@ export default class ProductController {
   }
 
   /**
-   * Retrieve all Product
+   * Retrieve all Inventory
    * @param param0 pag
-   * @returns {products: ProductInterface, page: number}
+   * @returns {inventory: InventoryInterface, page: number}
    */
-  public async getProducts({
+  public async getInventories({
     page,
     search_term,
     limit = 10,
@@ -24,7 +23,7 @@ export default class ProductController {
     page: number;
     search_term?: string;
     limit?: number;
-  }): Promise<{ products: ProductInterface[]; totalPages: number }> {
+  }): Promise<{ inventory: InventoryInterface[]; totalPages: number }> {
     const skipCount = (page - 1) * limit; // Calculate the number of documents to skip
 
     const searchFilter = search_term
@@ -57,7 +56,7 @@ export default class ProductController {
       : {};
 
     try {
-      const products = await Product.find(searchFilter)
+      const inventory = await Inventory.find(searchFilter)
         // .skip(skipCount)
         // .limit(limit)
         // .populate("images")
@@ -66,22 +65,22 @@ export default class ProductController {
         .sort({ name: "asc" })
         .exec();
 
-      const totalProductsCount = await Product.countDocuments(
+      const totalInventoriesCount = await Inventory.countDocuments(
         searchFilter
       ).exec();
-      const totalPages = Math.ceil(totalProductsCount / limit);
+      const totalPages = Math.ceil(totalInventoriesCount / limit);
 
-      return { products, totalPages };
+      return { inventory, totalPages };
     } catch (error) {
       console.log(error);
 
-      throw new Error("Error retrieving products");
+      throw new Error("Error retrieving inventory");
     }
   }
 
-  public async getProduct({ id }: { id: string }) {
+  public async getInventory({ id }: { id: string }) {
     try {
-      const product = await Product.findById(id).populate("images");
+      const product = await Inventory.findById(id).populate("images");
       // const reviews = await this.Reviews.find({ product: id }).populate("user");
 
       // product.reviews = reviews;
@@ -91,101 +90,84 @@ export default class ProductController {
     }
   }
 
-  public createProduct = async ({
-    name,
-    price,
+  public createInventory = async ({
+    path,
+    quantity,
+    stockDate,
     description,
-    category,
-    costPrice,
-    stockAtHome,
-    stockAtShop,
+    location,
+    availability,
+    code,
   }: {
-    name: string;
-    price: string;
-    description?: string;
-    category?: string;
-    costPrice: string;
-    stockAtHome: string;
-    stockAtShop: string;
+    path: string;
+    quantity: string;
+    stockDate: string;
+    description: string;
+    location: string;
+    availability: string;
+    code: string;
   }) => {
-    const session = await getSession(this.request.headers.get("Cookie"));
-    const existingProduct = await Product.findOne({ name });
-
-    if (existingProduct) {
-      session.flash("message", {
-        title: "Product already exists",
-        status: "error",
-      });
-      return redirect("/prodducts", {
-        headers: {
-          "Set-Cookie": await commitSession(session),
-        },
-      });
-    }
-
-    const product = await Product.create({
-      name,
+    const session = await getFlashSession(this.request.headers.get("Cookie"));
+    const inventory = await Inventory.create({
+      quantity,
+      stockDate,
       description,
-      category: category != "" ? category : null,
-      availability: "available",
-      costPrice: costPrice ? parseFloat(costPrice) : null,
-      price: price ? parseFloat(price) : null,
-      stockAtHome: parseInt(stockAtHome),
-      stockAtShop: parseInt(stockAtShop),
+      location,
+      availability,
+      code,
     });
 
-    if (!product) {
+    if (!inventory) {
       session.flash("message", {
-        title: "Error Adding Product",
+        title: "Error Adding Inventory",
         status: "error",
       });
-      return redirect("/prodducts", {
+      return redirect(path, {
         headers: {
-          "Set-Cookie": await commitSession(session),
-        },
-      });
-    }
-
-    return product;
-    // session.flash("message", {
-    //   title: "Product Added Successful",
-    //   status: "success",
-    // });
-    // return redirect("/prodducts", {
-    //   headers: {
-    //     "Set-Cookie": await commitSession(session),
-    //   },
-    // });
-  };
-
-  /**
-   * Import products from csv
-   * @param data Array of products
-   * @returns null
-   */
-  public importBatch = async (data) => {
-    const session = await getSession(this.request.headers.get("Cookie"));
-
-    const products = await Product.create(data);
-    if (!products) {
-      session.flash("message", {
-        title: "Error Importing Products",
-        status: "error",
-      });
-      return redirect(`/products`, {
-        headers: {
-          "Set-Cookie": await commitSession(session),
+          "Set-Cookie": await commitFlashSession(session),
         },
       });
     }
 
     session.flash("message", {
-      title: "Products Imported Successful",
+      title: "Inventory Added Successful",
       status: "success",
     });
-    return redirect(`/products`, {
+    return redirect(path, {
       headers: {
-        "Set-Cookie": await commitSession(session),
+        "Set-Cookie": await commitFlashSession(session),
+      },
+    });
+  };
+
+  /**
+   * Import inventory from csv
+   * @param data Array of inventory
+   * @returns null
+   */
+  public importBatch = async (data) => {
+    const session = await getFlashSession(this.request.headers.get("Cookie"));
+
+    const inventory = await Inventory.create(data);
+    if (!inventory) {
+      session.flash("message", {
+        title: "Error Importing Inventories",
+        status: "error",
+      });
+      return redirect(path, {
+        headers: {
+          "Set-Cookie": await commitFlashSession(session),
+        },
+      });
+    }
+
+    session.flash("message", {
+      title: "Inventories Imported Successful",
+      status: "success",
+    });
+    return redirect(path, {
+      headers: {
+        "Set-Cookie": await commitFlashSession(session),
       },
     });
   };
@@ -195,68 +177,66 @@ export default class ProductController {
    * @param param0 _id, name, price, description, category, quantity, costPrice
    * @returns null
    */
-  public updateProduct = async ({
-    id,
-    name,
-    price,
+  public updateInventory = async ({
+    _id,
+    path,
+    stockDate,
     description,
-    category,
-    costPrice,
-    stockAtHome,
-    stockAtShop,
+    location,
+    availability,
+    quantity,
+    code,
   }: {
-    id: string;
-    name: string;
-    price: string;
-    description?: string;
-    category?: string;
-    costPrice: string;
-    stockAtHome: string;
-    stockAtShop: string;
+    _id: string;
+    path: string;
+    stockDate: string;
+    description: string;
+    location: string;
+    availability: string;
+    quantity: string;
+    code: string;
   }) => {
-    const session = await getSession(this.request.headers.get("Cookie"));
+    const session = await getFlashSession(this.request.headers.get("Cookie"));
 
     try {
-      const updated = await Product.findByIdAndUpdate(
-        id,
+      const updated = await Inventory.findByIdAndUpdate(
+        _id,
         {
-          name,
-          price,
+          stockDate,
           description,
-          category: category != "" ? category : null,
-          costPrice,
-          stockAtHome: parseInt(stockAtHome),
-          stockAtShop: parseInt(stockAtShop),
+          location,
+          availability,
+          quantity,
+          code,
         },
         { new: true }
       );
 
-      // session.flash("message", {
-      //   title: "Product Updated Successful",
-      //   status: "success",
-      // });
-      // return redirect(path, {
-      //   headers: {
-      //     "Set-Cookie": await commitSession(session),
-      //   },
-      // });
-      return updated;
+      session.flash("message", {
+        title: "Inventory Updated Successful",
+        status: "success",
+      });
+      return redirect(path, {
+        headers: {
+          "Set-Cookie": await commitFlashSession(session),
+        },
+      });
     } catch (error) {
       console.log(error);
 
       session.flash("message", {
-        title: "Error Updating Product",
+        title: "Error Updating Inventory",
         status: "error",
       });
-      return redirect("/products", {
+      return redirect("/inventory", {
         headers: {
-          "Set-Cookie": await commitSession(session),
+          "Set-Cookie": await commitFlashSession(session),
         },
       });
     }
   };
 
-  public stockProduct = async ({
+  public stockInventory = async ({
     _id,
     quantity,
     operation,
@@ -271,8 +251,8 @@ export default class ProductController {
     costPrice: string;
     note: string;
   }) => {
-    const session = await getSession(this.request.headers.get("Cookie"));
-    const product = await Product.findById(_id);
+    const session = await getFlashSession(this.request.headers.get("Cookie"));
+    const product = await Inventory.findById(_id);
     const generalSettings = await new SettingsController(
       this.request
     ).getGeneralSettings();
@@ -300,18 +280,18 @@ export default class ProductController {
     });
 
     session.flash("message", {
-      title: "Product Stocked Successful",
+      title: "Inventory Stocked Successful",
       status: "success",
     });
-    return redirect(`/products/${_id}`, {
+    return redirect(`/inventory/${_id}`, {
       headers: {
-        "Set-Cookie": await commitSession(session),
+        "Set-Cookie": await commitFlashSession(session),
       },
     });
   };
 
   public getStockHistory = async ({ id }: { id: string }) => {
-    const session = await getSession(this.request.headers.get("Cookie"));
+    const session = await getFlashSession(this.request.headers.get("Cookie"));
 
     try {
       const stockHistory = await RestockHistory.find({ product: id })
@@ -327,40 +307,46 @@ export default class ProductController {
         title: "Error Getting Stock History",
         status: "error",
       });
-      return redirect(`/products/${id}`, {
+      return redirect(`/inventory/${id}`, {
         headers: {
-          "Set-Cookie": await commitSession(session),
+          "Set-Cookie": await commitFlashSession(session),
         },
       });
     }
   };
 
-  public deleteProduct = async (id: string) => {
-    const session = await getSession(this.request.headers.get("Cookie"));
+  public deleteInventory = async ({
+    _id,
+    path,
+  }: {
+    _id: string;
+    path: string;
+  }) => {
+    const session = await getFlashSession(this.request.headers.get("Cookie"));
 
     try {
-      await Product.findByIdAndDelete(id);
+      await Inventory.findByIdAndDelete(_id);
 
-      return true;
+      // return true;
       session.flash("message", {
-        title: "Product Deleted Successful",
+        title: "Inventory Deleted Successful",
         status: "success",
       });
-      return redirect(`/products`, {
+      return redirect(path, {
         headers: {
-          "Set-Cookie": await commitSession(session),
+          "Set-Cookie": await commitFlashSession(session),
         },
       });
     } catch (err) {
       console.log(err);
 
       session.flash("message", {
-        title: "Error Deleting Product",
+        title: "Error Deleting Inventory",
         status: "error",
       });
-      return redirect(`/products`, {
+      return redirect(path, {
         headers: {
-          "Set-Cookie": await commitSession(session),
+          "Set-Cookie": await commitFlashSession(session),
         },
       });
     }
@@ -401,10 +387,10 @@ export default class ProductController {
         .limit(limit)
         .exec();
 
-      const totalProductsCount = await Category.countDocuments(
+      const totalInventoriesCount = await Category.countDocuments(
         searchFilter
       ).exec();
-      const totalPages = Math.ceil(totalProductsCount / limit);
+      const totalPages = Math.ceil(totalInventoriesCount / limit);
 
       return { categories, totalPages };
     } catch (error) {
@@ -447,7 +433,7 @@ export default class ProductController {
     status?: string;
     featured?: string;
   }) {
-    const session = await getSession(this.request.headers.get("Cookie"));
+    const session = await getFlashSession(this.request.headers.get("Cookie"));
 
     const existingCategory = await Category.findOne({ name });
 
@@ -458,7 +444,7 @@ export default class ProductController {
       });
       return redirect(`/categories`, {
         headers: {
-          "Set-Cookie": await commitSession(session),
+          "Set-Cookie": await commitFlashSession(session),
         },
       });
     }
@@ -477,7 +463,7 @@ export default class ProductController {
       });
       return redirect(`/categories`, {
         headers: {
-          "Set-Cookie": await commitSession(session),
+          "Set-Cookie": await commitFlashSession(session),
         },
       });
     }
@@ -489,7 +475,7 @@ export default class ProductController {
     // });
     // return redirect(`/categories`, {
     //   headers: {
-    //     "Set-Cookie": await commitSession(session),
+    //     "Set-Cookie": await commitFlashSession(session),
     //   },
     // });
   }
@@ -507,7 +493,7 @@ export default class ProductController {
     status?: string;
     featured?: string;
   }) {
-    const session = await getSession(this.request.headers.get("Cookie"));
+    const session = await getFlashSession(this.request.headers.get("Cookie"));
 
     try {
       const updated = await Category.findByIdAndUpdate(
@@ -530,7 +516,7 @@ export default class ProductController {
       // });
       // return redirect(`/categories`, {
       //   headers: {
-      //     "Set-Cookie": await commitSession(session),
+      //     "Set-Cookie": await commitFlashSession(session),
       //   },
       // });
     } catch (error) {
@@ -540,14 +526,14 @@ export default class ProductController {
       });
       return redirect(`/categories`, {
         headers: {
-          "Set-Cookie": await commitSession(session),
+          "Set-Cookie": await commitFlashSession(session),
         },
       });
     }
   }
 
   public deleteCategory = async (id: string) => {
-    const session = await getSession(this.request.headers.get("Cookie"));
+    const session = await getFlashSession(this.request.headers.get("Cookie"));
 
     try {
       await Category.findByIdAndDelete(id);
@@ -559,7 +545,7 @@ export default class ProductController {
       });
       return redirect(`/categories`, {
         headers: {
-          "Set-Cookie": await commitSession(session),
+          "Set-Cookie": await commitFlashSession(session),
         },
       });
     } catch (err) {
@@ -570,25 +556,25 @@ export default class ProductController {
       });
       return redirect(`/categories`, {
         headers: {
-          "Set-Cookie": await commitSession(session),
+          "Set-Cookie": await commitFlashSession(session),
         },
       });
     }
   };
 
-  public addProductImage = async ({
+  public addInventoryImage = async ({
     productId,
     images,
   }: {
     productId: string;
     images: any;
   }) => {
-    const session = await getSession(this.request.headers.get("Cookie"));
+    const session = await getFlashSession(this.request.headers.get("Cookie"));
 
     const imagePromises = images.map(async (image) => {
       try {
-        // Assuming ProductImage.create returns a promise
-        const imageRes = await ProductImage.create({
+        // Assuming InventoryImage.create returns a promise
+        const imageRes = await InventoryImage.create({
           url: image,
           product: productId,
         });
@@ -605,7 +591,7 @@ export default class ProductController {
     const successfulResults = results.filter((result) => result !== null);
 
     try {
-      const product = await Product.findById(productId);
+      const product = await Inventory.findById(productId);
 
       const successfulIds = successfulResults.map((result) => result?._id);
       product.images.push(...successfulIds);
@@ -615,9 +601,9 @@ export default class ProductController {
         title: "Image Added Successful",
         status: "success",
       });
-      return redirect(`/products/${productId}`, {
+      return redirect(`/inventory/${productId}`, {
         headers: {
-          "Set-Cookie": await commitSession(session),
+          "Set-Cookie": await commitFlashSession(session),
         },
       });
     } catch (err) {
@@ -626,9 +612,9 @@ export default class ProductController {
         title: "Error Adding Image",
         status: "error",
       });
-      return redirect(`/products/${productId}`, {
+      return redirect(`/inventory/${productId}`, {
         headers: {
-          "Set-Cookie": await commitSession(session),
+          "Set-Cookie": await commitFlashSession(session),
         },
       });
     }
