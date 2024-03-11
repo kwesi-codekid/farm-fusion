@@ -19,6 +19,7 @@ import CustomTable from "~/components/custom/CustomTable";
 import CustomInput from "~/components/custom/CustomInput";
 import CustomSelect from "~/components/custom/CustomSelect";
 import { useEffect, useState } from "react";
+import InventoryController from "~/controllers/InventoryController";
 
 export default function Inventory() {
   const { admins, page, totalPages, search_term } = useLoaderData();
@@ -219,65 +220,68 @@ export default function Inventory() {
 }
 
 export const action: ActionFunction = async ({ request }) => {
+  const url = new URL(request.url);
+  const path = url.pathname + url.search;
+
   const formData = await request.formData();
   const intent = formData.get("intent");
 
   const _id = formData.get("_id") as string;
-  const firstName = formData.get("firstName") as string;
-  const lastName = formData.get("lastName") as string;
-  const phone = formData.get("phone") as string;
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-  const path = formData.get("path") as string;
-  const role = formData.get("role") as string;
+  const stockDate = formData.get("stockDate") as string;
+  const code = formData.get("code") as string;
+  const description = formData.get("description") as string;
+  const quantity = formData.get("quantity") as string;
+  const location = formData.get("location") as string;
+  const availability = formData.get("availability") as string;
 
-  const adminController = await new AdminController(request);
+  const inventoryController = await new InventoryController(request);
 
   switch (intent) {
     case "create": {
       const errors = {
-        password: passwordMatch(password),
-        confirmPassword: confirmPassword(
-          password,
-          formData.get("confirmPassword") as string
-        ),
-        email: validateEmail(email),
-        phone: phone ? null : "Phone is required",
-        role: role ? null : "Role is required",
-        designation: role ? null : "Designation is required",
-        firstName: validateFirstName(firstName),
-        lastName: validateLastName(lastName),
+        // password: passwordMatch(password),
+        // confirmPassword: confirmPassword(
+        //   password,
+        //   formData.get("confirmPassword") as string
+        // ),
+        // email: validateEmail(email),
+        // phone: phone ? null : "Phone is required",
+        // role: role ? null : "Role is required",
+        // designation: role ? null : "Designation is required",
+        // firstName: validateFirstName(firstName),
+        // lastName: validateLastName(lastName),
       };
 
       if (Object.values(errors).some(Boolean)) {
         return json({ errors }, { status: 400 });
       }
 
-      return await adminController.createAdmin({
+      return await inventoryController.createInventory({
         path,
-        firstName,
-        lastName,
-        email,
-        phone,
-        password,
-        role,
+        stockDate,
+        code,
+        description,
+        quantity,
+        location,
+        availability,
       });
     }
     case "update": {
-      return await adminController.updateAdminProfile({
+      return await inventoryController.updateInventory({
         path,
-        adminId: _id,
-        email,
-        phone,
-        firstName,
-        lastName,
-        role,
+        _id,
+        stockDate,
+        code,
+        description,
+        quantity,
+        location,
+        availability,
       });
     }
     case "delete": {
-      return await adminController.deleteAdmin({
+      return await inventoryController.deleteInventory({
         path,
-        adminId: _id,
+        _id,
       });
     }
     case "reset_password": {
@@ -292,7 +296,7 @@ export const action: ActionFunction = async ({ request }) => {
         return json({ errors }, { status: 400 });
       }
 
-      return await adminController.resetPassword({
+      return await inventoryController.resetPassword({
         path,
         adminId: _id,
         password,
