@@ -66,7 +66,7 @@ export const navLinks = [
     name: "Inventory",
     path: "/admin/inventory",
     children: [
-      { name: "Stocks", path: "/admin/inventory/stocks" },
+      { name: "Stocks", path: "/admin/inventory" },
       { name: "Products", path: "/admin/inventory/products" },
     ],
     icon: (
