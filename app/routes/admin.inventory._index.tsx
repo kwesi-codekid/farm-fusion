@@ -320,7 +320,9 @@ export const loader: LoaderFunction = async ({ request }) => {
   const user = await adminControlle.getAdmin();
   console.log(search_term);
 
-  const { admins, totalPages } = await adminControlle.getAdmins({
+  const inventoryController = await new InventoryController(request);
+
+  const { inventories, totalPages } = await inventoryController.getInventories({
     page,
     search_term,
     // status: status ? status : "pending",
@@ -328,12 +330,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     // to,
   });
 
-  console.log({ page, totalPages });
-
-  const roleController = new RoleController(request);
-  const { roles } = await roleController.getRoles({});
-
-  return { admins, page, totalPages, user, search_term, roles };
+  return { inventories, page, totalPages, user, search_term, roles };
 };
 
 export const meta: MetaFunction = () => {

@@ -13,7 +13,7 @@ export default class InventoryController {
   /**
    * Retrieve all Inventory
    * @param param0 pag
-   * @returns {inventory: InventoryInterface, page: number}
+   * @returns {inventories: InventoryInterface[], page: number}
    */
   public async getInventories({
     page,
@@ -23,14 +23,14 @@ export default class InventoryController {
     page: number;
     search_term?: string;
     limit?: number;
-  }): Promise<{ inventory: InventoryInterface[]; totalPages: number }> {
+  }): Promise<{ inventories: InventoryInterface[]; totalPages: number }> {
     const skipCount = (page - 1) * limit; // Calculate the number of documents to skip
 
     const searchFilter = search_term
       ? {
           $or: [
             {
-              name: {
+              code: {
                 $regex: new RegExp(
                   search_term
                     .split(" ")
@@ -56,7 +56,7 @@ export default class InventoryController {
       : {};
 
     try {
-      const inventory = await Inventory.find(searchFilter)
+      const inventories = await Inventory.find(searchFilter)
         // .skip(skipCount)
         // .limit(limit)
         // .populate("images")
@@ -70,11 +70,11 @@ export default class InventoryController {
       ).exec();
       const totalPages = Math.ceil(totalInventoriesCount / limit);
 
-      return { inventory, totalPages };
+      return { inventories, totalPages };
     } catch (error) {
       console.log(error);
 
-      throw new Error("Error retrieving inventory");
+      throw new Error("Error retrieving inventories");
     }
   }
 
