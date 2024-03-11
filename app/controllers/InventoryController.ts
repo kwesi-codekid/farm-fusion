@@ -24,8 +24,7 @@ export default class InventoryController {
     search_term?: string;
     limit?: number;
   }): Promise<{ inventories: InventoryInterface[]; totalPages: number }> {
-    const skipCount = (page - 1) * limit; // Calculate the number of documents to skip
-
+    const skipCount = (page - 1) * limit;
     const searchFilter = search_term
       ? {
           $or: [
