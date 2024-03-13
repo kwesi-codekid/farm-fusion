@@ -1,6 +1,10 @@
-const AppLogo = () => {
+const AppLogo = ({ hasBackground = true }: { hasBackground?: boolean }) => {
   return (
-    <div className="flex items-start gap-2 rounded-xl dark:bg-slate-800/50 py-3 justify-center pb-4">
+    <div
+      className={`flex items-start gap-2 rounded-xl ${
+        hasBackground && "dark:bg-slate-800/50"
+      } py-3 justify-center pb-4`}
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"

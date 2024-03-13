@@ -6,3 +6,11 @@ export const inventoryColumns = [
   { title: "Availability", key: "availability" },
   { title: "Actions", key: "actions" },
 ];
+
+export const customerColumns = [
+  { title: "Full Name", key: "fullName" },
+  { title: "Email", key: "email" },
+  { title: "Phone", key: "phone" },
+  { title: "Address", key: "address" },
+  { title: "Actions", key: "actions" },
+];

@@ -1,5 +1,7 @@
 import type { MetaFunction } from "@remix-run/node";
 
+import PublicLayout from "~/layouts/public";
+
 export const meta: MetaFunction = () => {
   return [
     { title: "New Remix App" },
@@ -12,10 +14,10 @@ import NextModal from "~/components/next-ui/NextModal";
 
 export default function Index() {
   return (
-    <div>
+    <PublicLayout>
       <ThemeSwitcher />
       <NextModal />
       <h1 className="text-red-500">Welcome to Remix</h1>
-    </div>
+    </PublicLayout>
   );
 }
