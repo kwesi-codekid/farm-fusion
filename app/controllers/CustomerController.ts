@@ -155,13 +155,17 @@ export default class CustomerController {
    * @returns null if user already exists, else returns a session
    */
   public registerCustomer = async ({
-    username,
     email,
     password,
+    phone,
+    address,
+    fullName,
   }: {
-    username: string;
+    fullName: string;
     email: string;
     password: string;
+    phone: string;
+    address: string;
   }) => {
     const session = await getFlashSession(this.request.headers.get("Cookie"));
 
@@ -182,8 +186,10 @@ export default class CustomerController {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await Customer.create({
-      username,
       email,
+      phone,
+      address,
+      fullName,
       password: hashedPassword,
     });
 
