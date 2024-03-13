@@ -21,22 +21,35 @@ const CustomSelect = ({
   isInvalid?: boolean;
   errorMessage?: string;
   isRequired?: boolean;
-  defaultKey?: any;
+  defaultKey?: string;
 }) => {
   return (
     <Select
       items={items}
       label={label}
-      className="max-w-xs"
+      classNames={{
+        trigger: "dark:!bg-slate-800 dark:!border-slate-700/20",
+        popoverContent: "dark:!bg-slate-800 dark:!border-slate-700/20",
+        label: "font-nunito font-bold",
+      }}
+      listboxProps={{
+        itemClasses: {
+          base: [
+            "rounded-md",
+            "dark:hover:!bg-slate-700",
+            "dark:!text-slate-200",
+          ],
+        },
+      }}
       name={name}
       isInvalid={isInvalid}
       errorMessage={errorMessage}
-      required={isRequired}
-      defaultSelectedKeys={[defaultKey]}
+      isRequired={isRequired}
+      defaultSelectedKeys={defaultKey ? [defaultKey] : []}
       renderValue={(items) => {
         return (
           <div className="py-2">
-            {items.map((item) => (
+            {items.map((item: any) => (
               <Chip variant="flat" size="sm" key={item.key}>
                 {item.data.label}
               </Chip>

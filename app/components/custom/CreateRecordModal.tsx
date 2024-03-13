@@ -15,11 +15,24 @@ const CreateRecordModal = ({
   onCloseModal,
   title,
   children,
+  size = "3xl",
 }: {
   isModalOpen: boolean;
   onCloseModal: () => void;
   title: string;
   children: React.ReactNode;
+  size?:
+    | "xs"
+    | "sm"
+    | "md"
+    | "lg"
+    | "xl"
+    | "2xl"
+    | "3xl"
+    | "4xl"
+    | "5xl"
+    | "full"
+    | undefined;
 }) => {
   // state to handle loading
   const navigation = useNavigation();
@@ -67,7 +80,7 @@ const CreateRecordModal = ({
       isOpen={isModalOpen}
       onClose={onCloseModal}
       className="dark:bg-slate-900 border-[1px] dark:border-slate-700/20 w-full md:w-1/2"
-      size="5xl"
+      size={size}
       motionProps={{
         variants: {
           enter: {

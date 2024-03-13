@@ -35,6 +35,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                   <div key={index}>
                     {link.children.length > 0 ? (
                       <Accordion
+                        defaultExpandedKeys={[pathname]}
                         motionProps={{
                           variants: {
                             enter: {
@@ -75,7 +76,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                         className="w-full"
                       >
                         <AccordionItem
-                          key={index}
+                          key={link.path}
                           title={link.name}
                           startContent={link.icon}
                         >
