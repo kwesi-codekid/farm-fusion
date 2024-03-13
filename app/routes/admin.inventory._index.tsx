@@ -16,7 +16,6 @@ import {
   useNavigate,
 } from "@remix-run/react";
 import {
-  Image,
   Table,
   TableHeader,
   TableColumn,
