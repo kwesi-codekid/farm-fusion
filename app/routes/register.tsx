@@ -13,7 +13,12 @@ import analyticSVG from "~/assets/svgs/analytics.svg";
 import { EyeFilledIcon } from "~/assets/icons/EyeFilled";
 import { EyeSlashFilledIcon } from "~/assets/icons/EyeSlashFilled";
 import AdminController from "~/controllers/AdminController";
-import { validateEmail, validatePassword } from "~/validators";
+import {
+  confirmPassword,
+  validateEmail,
+  validateName,
+  validatePassword,
+} from "~/validators";
 import { Form, useActionData } from "@remix-run/react";
 import { useState } from "react";
 import CustomerController from "~/controllers/CustomerController";
@@ -186,13 +191,15 @@ export const action: ActionFunction = async ({ request }) => {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const fullName = formData.get("fullName") as string;
-  const confirmPassword = formData.get("confirmPassword") as string;
+  const confirm_password = formData.get("confirmPassword") as string;
   const address = formData.get("address") as string;
   const phone = formData.get("phone") as string;
 
   const errors = {
+    fullName: !validateName(email) ? "Invalid name" : null,
     email: validateEmail(email),
     password: validatePassword(password),
+    confirmPassword: confirmPassword(password, confirm_password),
   };
 
   if (Object.values(errors).some(Boolean)) {
