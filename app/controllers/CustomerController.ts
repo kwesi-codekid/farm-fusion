@@ -36,9 +36,9 @@ export default class CustomerController {
     return this.storage.getSession(this.request.headers.get("Cookie"));
   }
 
-  private async createCustomerSession(userId: string, redirectTo: string) {
+  private async createCustomerSession(customerId: string, redirectTo: string) {
     const session = await this.storage.getSession();
-    session.set("userId", userId);
+    session.set("customerId", customerId);
 
     return redirect(redirectTo, {
       headers: {
@@ -75,16 +75,18 @@ export default class CustomerController {
   }
 
   public getAuthCustomer = async () => {
-    const userId = await this.getCustomerId();
+    const customerId = await this.getCustomerId();
 
     try {
-      const user = await Customer.findById(userId, {
+      const user = await Customer.findById(customerId, {
         email: true,
         username: true,
         lastName: true,
         firstName: true,
         middleName: true,
       });
+      console.log(user);
+
       return user;
     } catch {
       // throw new Error("Error retrieving products");
@@ -133,7 +135,7 @@ export default class CustomerController {
         title: "No Account with email!",
         status: "error",
       });
-      return redirect(`/customer/login`, {
+      return redirect(`/login`, {
         headers: {
           "Set-Cookie": await commitFlashSession(session),
         },
@@ -148,7 +150,7 @@ export default class CustomerController {
         title: "Invalid Credentials",
         status: "error",
       });
-      return redirect(`/customer/login`, {
+      return redirect(`/login`, {
         headers: {
           "Set-Cookie": await commitFlashSession(session),
         },
@@ -228,12 +230,12 @@ export default class CustomerController {
     lastName: string;
     email: string;
   }) => {
-    const userId = await this.getCustomerId();
+    const customerId = await this.getCustomerId();
     const session = await getFlashSession(this.request.headers.get("Cookie"));
 
     try {
       const user = await Customer.findByIdAndUpdate(
-        userId,
+        customerId,
         {
           firstName,
           lastName,
@@ -273,8 +275,8 @@ export default class CustomerController {
     password: string;
   }) => {
     const session = await getFlashSession(this.request.headers.get("Cookie"));
-    const userId = await this.getCustomerId();
-    const customer = await Customer.findById(userId);
+    const customerId = await this.getCustomerId();
+    const customer = await Customer.findById(customerId);
 
     if (customer) {
       const valid = await bcrypt.compare(currentPassword, customer.password);
