@@ -55,7 +55,7 @@ export default class CustomerController {
     const customerId = session.get("customerId");
     if (!customerId || typeof customerId !== "string") {
       const searchParams = new URLSearchParams([["redirectTo", redirectTo]]);
-      throw redirect(`/customer/login?${searchParams}`);
+      throw redirect(`/login?${searchParams}`);
     }
 
     return customerId;
@@ -74,23 +74,34 @@ export default class CustomerController {
     return customerId;
   }
 
+  public getAuthCustomer = async () => {
+    const userId = await this.getCustomerId();
+
+    try {
+      const user = await Customer.findById(userId, {
+        email: true,
+        username: true,
+        lastName: true,
+        firstName: true,
+        middleName: true,
+      });
+      return user;
+    } catch {
+      // throw new Error("Error retrieving products");
+      throw this.logout();
+    }
+  };
+
   public async getCustomer() {
     const session = await getFlashSession(this.request.headers.get("Cookie"));
     const customerId = await this.requireCustomerId();
 
     try {
       const customer = await Customer.findById(customerId).select("-password");
+      console.log(customer);
 
       if (!customer) {
-        session.flash("message", {
-          title: "No Account!",
-          status: "error",
-        });
-        return redirect(`/customer/login`, {
-          headers: {
-            "Set-Cookie": await commitFlashSession(session),
-          },
-        });
+        throw this.logout();
       }
 
       return customer;
@@ -385,7 +396,7 @@ export default class CustomerController {
 
   public async getCustomerDetails({ id }: { id: string }) {
     try {
-      const product = await Customer.findById(id).populate("images");
+      const product = await Customer.findById(id);
       // const reviews = await this.Reviews.find({ product: id }).populate("user");
 
       // product.reviews = reviews;

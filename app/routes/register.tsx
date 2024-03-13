@@ -196,7 +196,7 @@ export const action: ActionFunction = async ({ request }) => {
   const phone = formData.get("phone") as string;
 
   const errors = {
-    fullName: !validateName(email) ? "Invalid name" : null,
+    fullName: !validateName(fullName) ? "Invalid name" : null,
     email: validateEmail(email),
     password: validatePassword(password),
     confirmPassword: confirmPassword(password, confirm_password),
@@ -217,9 +217,8 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  // const customerController = await new AdminController(request);
-  // return (await customerController.getAdminId()) ? redirect("/admin") : null;
-  return null;
+  const customerController = await new CustomerController(request);
+  return (await customerController.getAuthCustomer()) ? redirect("/") : null;
 };
 
 export const meta: MetaFunction = () => {
