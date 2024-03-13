@@ -1,4 +1,9 @@
-import { ActionFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
+import {
+  ActionFunction,
+  LoaderFunction,
+  MetaFunction,
+  json,
+} from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import React from "react";
 import AdminController from "~/controllers/AdminController";
