@@ -44,8 +44,8 @@ export const navLinks = [
     ),
     children: [
       {
-        name: "Admins",
-        title: "Manage Admins",
+        name: "Users",
+        title: "Manage Users",
         path: "/admin/users",
         end: true,
       },
@@ -86,10 +86,11 @@ export const navLinks = [
   },
   {
     name: "Inventory",
+    title: "Inventory Management",
     path: "/admin/inventory",
     children: [
       { name: "Stocks", path: "/admin/inventory" },
-      { name: "Products", path: "/admin/inventory/products" },
+      { name: "Categories", path: "/admin/inventory/categories" },
     ],
     icon: (
       <svg

@@ -84,8 +84,15 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                             <NavLink
                               key={index}
                               to={child.path}
-                              className="flex items-center gap-2 p-3 font-montserrat text-sm text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-900/30"
+                              className={`flex items-center gap-2 p-3 py-2 font-quicksand font-medium text-sm text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-900/30 rounded-lg ${
+                                pathname === child.path
+                                  ? " dark:bg-slate-950/40 !text-lightgreen bg-green-400/5 pl-0"
+                                  : ""
+                              }`}
                             >
+                              {pathname === child.path && (
+                                <span className="w-1 h-7 bg-violet-500 rounded-r-md"></span>
+                              )}
                               {child.icon ? child.icon : ""}
                               <span>{child.name}</span>
                             </NavLink>
@@ -98,7 +105,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                         to={link.path}
                         className={`flex items-center gap-2 p-3 py-2 font-quicksand font-medium text-sm text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-900/30 rounded-lg ${
                           pathname === link.path
-                            ? " dark:bg-slate-950 !text-lightgreen bg-green-400/5 pl-0"
+                            ? " dark:bg-slate-950/40 !text-lightgreen bg-green-400/5 pl-0"
                             : ""
                         }`}
                       >
