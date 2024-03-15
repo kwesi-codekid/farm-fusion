@@ -4,6 +4,7 @@ const CustomerOrders = () => {
   return (
     <CustomerLayout>
       <div className="h-full flex flex-col gap-4 lg:gap-5">
+        {/* overview cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
           <div className="rounded-xl px-3 py-2 h-16 bg-white dark:bg-slate-900"></div>
           <div className="rounded-xl px-3 py-2 h-16 bg-white dark:bg-slate-900"></div>
