@@ -4,10 +4,23 @@ import type { CustomerInterface } from "../types";
 
 const CustomerSchema: Schema = new mongoose.Schema(
   {
-    fullName: String,
-    email: String,
-    phone: String,
+    fullName: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    phone: {
+      type: String,
+      required: true,
+    },
     address: String,
+    password: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );

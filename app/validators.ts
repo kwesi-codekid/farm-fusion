@@ -3,6 +3,7 @@ export const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
 export const usernameRegex = /^[a-zA-Z0-9_.-]{3,}$/;
 export const nameRegex = /^[a-zA-Z]{2,}$/;
+export const fullNameRegex = /^[A-Z][a-z]+ [A-Z][a-z]+$/;
 export const phoneRegex = /^[0-9]{10,}$/;
 export const addressRegex = /^[a-zA-Z0-9\s,'-]*$/;
 
@@ -35,7 +36,7 @@ export const validateUsername = (username: string) => {
 };
 
 export const validateName = (name: string) => {
-  return nameRegex.test(name);
+  return fullNameRegex.test(name);
 };
 
 export const validatePhone = (phone: string) => {

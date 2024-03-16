@@ -16,6 +16,7 @@ import AdminController from "~/controllers/AdminController";
 import { validateEmail, validatePassword } from "~/validators";
 import { Form, useActionData } from "@remix-run/react";
 import { useState } from "react";
+import CustomerController from "~/controllers/CustomerController";
 
 const Login = () => {
   const actionData = useActionData();
@@ -157,13 +158,13 @@ export const action: ActionFunction = async ({ request }) => {
     return json({ errors }, { status: 400 });
   }
 
-  const adminController = await new AdminController(request);
-  return await adminController.loginAdmin({ email, password });
+  const customerController = await new CustomerController(request);
+  return await customerController.loginCustomer({ email, password });
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  // const adminController = await new AdminController(request);
-  // return (await adminController.getAdminId()) ? redirect("/admin") : null;
+  const customerController = await new CustomerController(request);
+  return (await customerController.getAuthCustomer()) ? redirect("/") : null;
   return null;
 };
 

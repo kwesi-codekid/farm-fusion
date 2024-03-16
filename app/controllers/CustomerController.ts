@@ -1,13 +1,332 @@
-import { redirect } from "@remix-run/node";
+import {
+  SessionStorage,
+  createCookieSessionStorage,
+  json,
+  redirect,
+} from "@remix-run/node";
 import type { CustomerInterface } from "../types";
 import { commitFlashSession, getFlashSession } from "~/flash-session";
 import Customer from "~/models/Customer";
+import bcrypt from "bcryptjs";
 
 export default class CustomerController {
   private request: Request;
+  private storage: SessionStorage;
 
   constructor(request: Request) {
     this.request = request;
+
+    const secret = process.env.SESSION_SECRET;
+    if (!secret) {
+      throw new Error("No session secret provided");
+    }
+    this.storage = createCookieSessionStorage({
+      cookie: {
+        name: "__session",
+        secrets: [secret],
+        sameSite: "lax",
+        httpOnly: true,
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+      },
+    });
+  }
+
+  private async getCustomerSession() {
+    return this.storage.getSession(this.request.headers.get("Cookie"));
+  }
+
+  private async createCustomerSession(customerId: string, redirectTo: string) {
+    const session = await this.storage.getSession();
+    session.set("customerId", customerId);
+
+    return redirect(redirectTo, {
+      headers: {
+        "Set-Cookie": await this.storage.commitSession(session),
+      },
+    });
+  }
+
+  public async requireCustomerId(
+    redirectTo: string = new URL(this.request.url).pathname
+  ) {
+    const session = await this.getCustomerSession();
+
+    const customerId = session.get("customerId");
+    if (!customerId || typeof customerId !== "string") {
+      const searchParams = new URLSearchParams([["redirectTo", redirectTo]]);
+      throw redirect(`/login?${searchParams}`);
+    }
+
+    return customerId;
+  }
+
+  /**
+   * Get the current logged in user's Id
+   * @returns customer_id :string
+   */
+  public async getCustomerId() {
+    const session = await this.getCustomerSession();
+    const customerId = session.get("customerId");
+    if (!customerId || typeof customerId !== "string") {
+      return null;
+    }
+    return customerId;
+  }
+
+  public getAuthCustomer = async () => {
+    const customerId = await this.getCustomerId();
+
+    try {
+      const user = await Customer.findById(customerId, {
+        email: true,
+        username: true,
+        lastName: true,
+        firstName: true,
+        middleName: true,
+      });
+      console.log(user);
+
+      return user;
+    } catch {
+      // throw new Error("Error retrieving products");
+      throw this.logout();
+    }
+  };
+
+  public async getCustomer() {
+    const session = await getFlashSession(this.request.headers.get("Cookie"));
+    const customerId = await this.requireCustomerId();
+
+    try {
+      const customer = await Customer.findById(customerId).select("-password");
+      console.log(customer);
+
+      if (!customer) {
+        throw this.logout();
+      }
+
+      return customer;
+    } catch {
+      throw this.logout();
+    }
+  }
+
+  public async loginCustomer({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) {
+    const session = await getFlashSession(this.request.headers.get("Cookie"));
+
+    const customer = await Customer.findOne({
+      email,
+    });
+
+    // const hashedPassword = await bcrypt.hash(password, 10);
+    // console.log(hashedPassword);
+    // console.log(customer);
+
+    if (!customer) {
+      console.log("No Account with email!");
+      session.flash("message", {
+        title: "No Account with email!",
+        status: "error",
+      });
+      return redirect(`/login`, {
+        headers: {
+          "Set-Cookie": await commitFlashSession(session),
+        },
+      });
+    }
+
+    const valid = await bcrypt.compare(password, customer.password);
+
+    if (!valid) {
+      console.log("Invalid Credentials");
+      session.flash("message", {
+        title: "Invalid Credentials",
+        status: "error",
+      });
+      return redirect(`/login`, {
+        headers: {
+          "Set-Cookie": await commitFlashSession(session),
+        },
+      });
+    }
+
+    return this.createCustomerSession(customer.id, "/customer");
+  }
+
+  /**
+   * Register a new Customer account
+   * @param username Customer's username
+   * @param email Customer's email
+   * @param password Customer's password
+   * @returns null if user already exists, else returns a session
+   */
+  public registerCustomer = async ({
+    email,
+    password,
+    phone,
+    address,
+    fullName,
+  }: {
+    fullName: string;
+    email: string;
+    password: string;
+    phone: string;
+    address: string;
+  }) => {
+    const session = await getFlashSession(this.request.headers.get("Cookie"));
+
+    const existingCustomer = await Customer.findOne({ email });
+
+    if (existingCustomer) {
+      console.log("Invalid Credentials");
+      session.flash("message", {
+        title: "Email already taken",
+        status: "error",
+      });
+      return redirect(`/login`, {
+        headers: {
+          "Set-Cookie": await commitFlashSession(session),
+        },
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await Customer.create({
+      email,
+      phone,
+      address,
+      fullName,
+      password: hashedPassword,
+    });
+
+    if (!user) {
+      session.flash("message", {
+        title: "Error occured while creating user!",
+        status: "error",
+      });
+      return redirect(`/login`, {
+        headers: {
+          "Set-Cookie": await commitFlashSession(session),
+        },
+      });
+    }
+
+    return this.createCustomerSession(user._id, "/");
+  };
+
+  public updateProfile = async ({
+    firstName,
+    lastName,
+    email,
+  }: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  }) => {
+    const customerId = await this.getCustomerId();
+    const session = await getFlashSession(this.request.headers.get("Cookie"));
+
+    try {
+      const user = await Customer.findByIdAndUpdate(
+        customerId,
+        {
+          firstName,
+          lastName,
+          email,
+        },
+        {
+          new: true,
+        }
+      );
+      session.flash("message", {
+        title: "Profile Updated",
+        status: "success",
+      });
+      return redirect(`/profile`, {
+        headers: {
+          "Set-Cookie": await commitFlashSession(session),
+        },
+      });
+    } catch (error) {
+      session.flash("message", {
+        title: "Error Updating Profile!",
+        status: "error",
+      });
+      return redirect(`/profile`, {
+        headers: {
+          "Set-Cookie": await commitFlashSession(session),
+        },
+      });
+    }
+  };
+
+  public changePassword = async ({
+    currentPassword,
+    password,
+  }: {
+    currentPassword: string;
+    password: string;
+  }) => {
+    const session = await getFlashSession(this.request.headers.get("Cookie"));
+    const customerId = await this.getCustomerId();
+    const customer = await Customer.findById(customerId);
+
+    if (customer) {
+      const valid = await bcrypt.compare(currentPassword, customer.password);
+
+      if (!valid) {
+        session.flash("message", {
+          title: "Incorrect Password!",
+          status: "error",
+        });
+        return redirect(`/profile`, {
+          headers: {
+            "Set-Cookie": await commitFlashSession(session),
+          },
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await Customer.findByIdAndUpdate(customer._id, {
+        password: hashedPassword,
+      });
+      session.flash("message", {
+        title: "Password Changed",
+        status: "success",
+      });
+      return redirect(`/profile`, {
+        headers: {
+          "Set-Cookie": await commitFlashSession(session),
+        },
+      });
+    } else {
+      session.flash("message", {
+        title: "Customer does not exist!",
+        status: "error",
+      });
+      return redirect(`/profile`, {
+        headers: {
+          "Set-Cookie": await commitFlashSession(session),
+        },
+      });
+    }
+  };
+
+  public async logout() {
+    const session = await this.getCustomerSession();
+
+    return redirect("/login", {
+      headers: {
+        "Set-Cookie": await this.storage.destroySession(session),
+      },
+    });
   }
 
   /**
@@ -77,9 +396,9 @@ export default class CustomerController {
     }
   }
 
-  public async getCustomer({ id }: { id: string }) {
+  public async getCustomerDetails({ id }: { id: string }) {
     try {
-      const product = await Customer.findById(id).populate("images");
+      const product = await Customer.findById(id);
       // const reviews = await this.Reviews.find({ product: id }).populate("user");
 
       // product.reviews = reviews;
@@ -256,8 +575,8 @@ export default class CustomerController {
       this.request
     ).getGeneralSettings();
 
-    // const adminController = await new AdminController(this.request);
-    // const adminId = await adminController.getAdminId();
+    // const customerController = await new CustomerController(this.request);
+    // const customerId = await customerController.getCustomerId();
 
     if (generalSettings?.separateStocks) {
       product.quantity += parseInt(quantity);
@@ -270,7 +589,7 @@ export default class CustomerController {
     }
 
     await RestockHistory.create({
-      user: adminId,
+      user: customerId,
       product: _id,
       quantity,
       price: parseFloat(price),
