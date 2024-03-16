@@ -74,7 +74,6 @@ export default function Inventory() {
 
   const navigate = useNavigate();
 
-  const [editItem, setEditItem] = useState({});
   // delete record stuff
   const deleteDisclosure = useDisclosure();
   const [deleteId, setDeleteId] = useState<string>("");

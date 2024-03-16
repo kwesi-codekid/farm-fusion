@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from "react";
+
+import {
+  Form,
+  useActionData,
+  useLoaderData,
+  useNavigate,
+} from "@remix-run/react";
 import {
   Table,
   TableHeader,
@@ -7,72 +13,94 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  getKeyValue,
   Spinner,
   Tooltip,
   useDisclosure,
   Button,
   Input,
   Pagination,
+  Chip,
 } from "@nextui-org/react";
-import { useAsyncList } from "@react-stately/data";
+
+// icons
 import { EyeOutlined } from "~/assets/icons/EyeOutlined";
 import { EditIcon } from "~/assets/icons/EditIcon";
 import { DeleteIcon } from "~/assets/icons/DeleteIcon";
 import { PlusIcon } from "~/assets/icons/PlusIcon";
-import ConfirmModal from "./ConfirmModal";
-import CreateRecordModal from "./CreateRecordModal";
-import EditRecordModal from "./EditRecordModal";
-import { useNavigate, Form } from "@remix-run/react";
 
-interface Column {
-  key: string;
-  name: string;
-}
+// modals
+import CreateRecordModal from "~/components/custom/CreateRecordModal";
+import EditRecordModal from "~/components/custom/EditRecordModal";
+import ConfirmModal from "~/components/custom/ConfirmModal";
 
-interface Item {
-  [key: string]: any;
-}
+import { ReactNode, useEffect, useState } from "react";
+import { useAsyncList } from "@react-stately/data";
 
-interface CustomTableProps {
-  items: Item[];
-  columns: Column[];
-  addButtonText: string;
-  createRecordFormItems?: React.ReactNode;
-  editRecordFormItems?: React.ReactNode;
-  editRecord: any;
-  setEditRecord: (record: any) => void;
-  currentPage?: number;
-  totalPages: number;
-  searchTerm?: string;
-}
+import emptyFolderSVG from "~/assets/svgs/empty_folder.svg";
 
-const CustomTable: React.FC<CustomTableProps> = ({
-  items,
-  columns,
-  addButtonText,
+export default function CustomTable({
   createRecordFormItems,
   editRecordFormItems,
-  editRecord,
-  setEditRecord,
-  currentPage,
-  totalPages,
-  searchTerm,
-}) => {
-  const navigate = useNavigate();
-  const [isLoading, setIsLoading] = React.useState(true);
+  tableColumns,
+  data,
+  page,
+  totalPages = 1,
+  search_term,
+}: {
+  createRecordFormItems: ReactNode;
+  editRecordFormItems: ReactNode;
+  tableColumns: any[];
+  data: any[];
+  page?: number;
+  totalPages?: number;
+  search_term?: string;
+}) {
+  // begin:: loader data
 
+  const [tableData, setTableData] = useState(data);
+
+  useEffect(() => {
+    setTableData(data);
+  }, [data, tableData]);
+  // end:: loader data
+
+  const navigate = useNavigate();
+
+  // delete record stuff
+  const deleteDisclosure = useDisclosure();
+  const [deleteId, setDeleteId] = useState<string>("");
+  const openDeleteModal = (deleteId: string) => {
+    setDeleteId(deleteId);
+    deleteDisclosure.onOpen();
+  };
+
+  // create record stuff
+  const createRecordDisclosure = useDisclosure();
+  const openCreateRecordModal = () => {
+    createRecordDisclosure.onOpen();
+  };
+
+  // edit record stuff
+  const editRecordDisclosure = useDisclosure();
+  const [editRecord, setEditRecord] = useState<any>({});
+  const openEditRecordModal = (record: any) => {
+    setEditRecord(record);
+    editRecordDisclosure.onOpen();
+  };
+
+  // table data:: useAsync logic, loading states
+  const [isLoading, setIsLoading] = useState(true);
   const list = useAsyncList({
     async load() {
       setIsLoading(false);
 
       return {
-        items: items,
+        items: tableData,
       };
     },
-    async sort({ items, sortDescriptor }) {
+    async sort({ items, sortDescriptor }: { items: any; sortDescriptor: any }) {
       return {
-        items: items.sort((a, b) => {
+        items: items.sort((a: any, b: any) => {
           const first = a[sortDescriptor.column];
           const second = b[sortDescriptor.column];
           let cmp =
@@ -87,31 +115,10 @@ const CustomTable: React.FC<CustomTableProps> = ({
       };
     },
   });
-
   useEffect(() => {
     list.reload();
-  }, [items]);
-
-  // delete record stuff
-  const deleteDisclosure = useDisclosure();
-  const [deleteId, setDeleteId] = React.useState<string>("");
-  const openDeleteModal = (deleteId: string) => {
-    setDeleteId(deleteId);
-    deleteDisclosure.onOpen();
-  };
-
-  // create record stuff
-  const createRecordDisclosure = useDisclosure();
-  const openCreateRecordModal = () => {
-    createRecordDisclosure.onOpen();
-  };
-
-  // edit record stuff
-  const editRecordDisclosure = useDisclosure();
-  const openEditRecordModal = (record: any) => {
-    setEditRecord(record);
-    editRecordDisclosure.onOpen();
-  };
+  }, [tableColumns]);
+  // end table data:: useAsync logic, loading states
 
   // table top content
   const tableTopContent = (
@@ -125,7 +132,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
             }}
             name="search_term"
             radius="lg"
-            defaultValue={searchTerm}
+            defaultValue={search_term}
             size="sm"
           />
           <Button
@@ -146,131 +153,169 @@ const CustomTable: React.FC<CustomTableProps> = ({
         onPress={openCreateRecordModal}
       >
         <Input className="hidden" name="intent" value={"create"} />
-        {addButtonText}
+        New Stock
       </Button>
     </div>
   );
+  // end table top content
 
   return (
-    <div className="flex flex-col gap-4">
-      {tableTopContent}
-      <Table
-        aria-label="Custom data table"
-        sortDescriptor={list.sortDescriptor}
-        onSortChange={list.sort}
-        removeWrapper
-        className="h-[50vh]"
-        classNames={{
-          table: "w-full",
-          // thead: "relative -top-4",
-        }}
-        isHeaderSticky
-        bottomContent={
-          totalPages > 0 ? (
-            <div className="flex w-full items-center">
-              <Pagination
-                showControls
-                showShadow
-                color="primary"
-                page={currentPage}
-                total={totalPages}
-                onChange={(page) => {
-                  let baseUrl = location.pathname + location.search;
-                  let regex = /([?&]page=)\d+/g;
+    <div>
+      <section className="p-4 flex flex-col gap-4">
+        {tableTopContent}
+        <Table
+          aria-label="Students Table"
+          sortDescriptor={list.sortDescriptor}
+          onSortChange={list.sort}
+          isHeaderSticky
+          classNames={{
+            wrapper: "dark:!bg-slate-900/80 bg-white/80",
+          }}
+          bottomContent={
+            totalPages > 1 ? (
+              <div className="flex w-full items-center">
+                <Pagination
+                  showControls
+                  showShadow
+                  color="primary"
+                  page={page}
+                  total={totalPages}
+                  onChange={(page) => {
+                    let baseUrl = location.pathname + location.search;
+                    const regex = /([?&]page=)\d+/g;
 
-                  if (
-                    baseUrl.includes("?page=") ||
-                    baseUrl.includes("&page=")
-                  ) {
-                    baseUrl = baseUrl.replace(regex, `$1${page}`);
-                  } else {
-                    baseUrl += baseUrl.includes("?")
-                      ? `&page=${page}`
-                      : `?page=${page}`;
-                  }
+                    if (
+                      baseUrl.includes("?page=") ||
+                      baseUrl.includes("&page=")
+                    ) {
+                      baseUrl = baseUrl.replace(regex, `$1${page}`);
+                    } else {
+                      baseUrl += baseUrl.includes("?")
+                        ? `&page=${page}`
+                        : `?page=${page}`;
+                    }
 
-                  navigate(baseUrl);
-                }}
-              />
-            </div>
-          ) : null
-        }
-      >
-        <TableHeader>
-          {columns.map((column) => (
-            <TableColumn
-              className="font-montserrat"
-              key={column.key}
-              allowsSorting
-            >
-              {column.name}
-            </TableColumn>
-          ))}
-        </TableHeader>
-        <TableBody
-          items={list.items}
-          isLoading={isLoading}
-          loadingContent={<Spinner label="Loading..." />}
+                    navigate(baseUrl);
+                  }}
+                />
+              </div>
+            ) : null
+          }
         >
-          {(item: any) => (
-            <TableRow key={item._id}>
-              {(columnKey) => {
-                return columnKey === "actions" ? (
-                  <TableCell key={columnKey}>
-                    <div className="relative flex items-center">
-                      <Tooltip content="Details">
-                        <Button
-                          variant="light"
-                          radius="full"
-                          color="default"
-                          isIconOnly
-                          size="sm"
-                        >
-                          <EyeOutlined className="size-4" />
-                        </Button>
-                      </Tooltip>
-                      <Tooltip content="Edit user">
-                        <Button
-                          variant="light"
-                          radius="full"
-                          color="primary"
-                          isIconOnly
-                          size="sm"
-                          onClick={() => openEditRecordModal(item)}
-                        >
-                          <EditIcon className="size-4" />
-                        </Button>
-                      </Tooltip>
-                      <Tooltip color="danger" content="Delete user">
-                        <Button
-                          onClick={() => openDeleteModal(item._id)}
-                          variant="light"
-                          radius="full"
-                          color="danger"
-                          isIconOnly
-                          size="sm"
-                        >
-                          <DeleteIcon className="size-4" />
-                        </Button>
-                      </Tooltip>
-                    </div>
-                  </TableCell>
-                ) : (
-                  <TableCell className="font-nunito text-sm" key={columnKey}>
-                    {getKeyValue(item, columnKey)}
-                  </TableCell>
-                );
-              }}
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          <TableHeader className="!bg-blue-500">
+            {tableColumns.map((column) => (
+              <TableColumn
+                className="font-montserrat bg-slate-700 dark:bg-slate-900 text-white"
+                key={column.key}
+                allowsSorting
+              >
+                {column.title}
+              </TableColumn>
+            ))}
+          </TableHeader>
+          <TableBody
+            // items={list.items}
+            isLoading={isLoading}
+            loadingContent={<Spinner label="Loading..." />}
+            emptyContent={
+              isLoading ? (
+                <></>
+              ) : (
+                <div className="flex items-center justify-center flex-col gap-3">
+                  <img src={emptyFolderSVG} alt="No data" />
+                  <p className="font-nunito text-lg md:text-xl">
+                    No records found
+                  </p>
+                </div>
+              )
+            }
+          >
+            {list.items.map((inventory: any, index) => (
+              <TableRow key={index}>
+                <TableCell className="font-nunito text-sm">
+                  {new Date(inventory.stockDate)
+                    .toLocaleDateString("en-GB")
+                    .replace(/\//g, "-")}
+                </TableCell>
+                <TableCell className="font-nunito text-sm">
+                  {inventory.quantity}
+                </TableCell>
+                <TableCell className="font-nunito text-sm">
+                  {inventory.description}
+                </TableCell>
+                <TableCell className="font-nunito text-sm">
+                  {inventory.location}
+                </TableCell>
+                <TableCell className="font-nunito text-sm">
+                  <Chip
+                    variant="flat"
+                    classNames={{
+                      content: "font-nunito text-xs",
+                    }}
+                    size="sm"
+                    color={
+                      inventory.availability === "in-stock"
+                        ? "success"
+                        : "danger"
+                    }
+                  >
+                    {inventory.availability}
+                  </Chip>
+                </TableCell>
+                <TableCell>
+                  <div className="relative flex items-center">
+                    <Tooltip content="Details">
+                      <Button
+                        variant="light"
+                        radius="full"
+                        color="default"
+                        isIconOnly
+                        size="sm"
+                        onPress={() => {
+                          navigate(`/admin/inventory/${inventory._id}`);
+                        }}
+                      >
+                        <EyeOutlined className="size-4" />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip content="Edit user">
+                      <Button
+                        variant="light"
+                        radius="full"
+                        color="primary"
+                        isIconOnly
+                        size="sm"
+                        onClick={() => openEditRecordModal(inventory)}
+                      >
+                        <EditIcon className="size-4" />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip color="danger" content="Delete user">
+                      <Button
+                        onClick={() => openDeleteModal(inventory._id)}
+                        variant="light"
+                        radius="full"
+                        color="danger"
+                        isIconOnly
+                        size="sm"
+                      >
+                        <DeleteIcon className="size-4" />
+                      </Button>
+                    </Tooltip>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </section>
 
       {/* create modal */}
       <CreateRecordModal
         title="Create Record"
         isModalOpen={createRecordDisclosure.isOpen}
         onCloseModal={createRecordDisclosure.onClose}
+        size={"md"}
       >
         {createRecordFormItems}
       </CreateRecordModal>
@@ -296,11 +341,9 @@ const CustomTable: React.FC<CustomTableProps> = ({
         <Input className="hidden" name="intent" value={"delete"} />
         <Input className="hidden" name="_id" value={deleteId} />
         <p className="font-nunito">
-          Are you sure you want to delete this user?
+          Are you sure you want to delete this stock?
         </p>
       </ConfirmModal>
     </div>
   );
-};
-
-export default CustomTable;
+}

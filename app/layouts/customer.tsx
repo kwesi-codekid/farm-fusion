@@ -58,8 +58,10 @@ const CustomerLayout = ({ children }: { children: ReactNode }) => {
           {customerNavLinks.map((navItem, index) => (
             <NavLink
               className={`${
-                navItem.href === pathname ? "bg-blue-500/50" : ""
-              } font-quicksand text-white rounded-lg py-2 flex items-center gap-2 hover:bg-blue-500/50 transition-all duration-300`}
+                navItem.href === pathname
+                  ? "bg-blue-500/50 dark:bg-slate-950/30"
+                  : ""
+              } font-quicksand text-white rounded-lg py-2 flex items-center gap-2 hover:bg-blue-500/50 hover:dark:bg-slate-950/30 transition-all duration-300`}
               key={index}
               to={navItem.href}
             >
